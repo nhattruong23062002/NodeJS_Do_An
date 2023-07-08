@@ -1,0 +1,134 @@
+{
+  "workbench.iconTheme": "material-icon-theme",
+  "editor.fontSize": 14,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "vscode_custom_css.imports": [
+    "file:///C:/custom.css"
+  ],
+  "editor.cursorWidth": 5,
+  "vscode_custom_css.policy": true,
+  "editor.tokenColorCustomizations": {
+    "[Dracula]": {
+      "textMateRules": [
+        {
+          "scope": [
+            "entity.other.attribute-name"
+          ],
+          "settings": {
+            "foreground": "#00FB8E",
+            "fontStyle": ""
+          }
+        },
+        {
+          "scope": [
+            "entity.name.function"
+          ],
+          "settings": {
+            "foreground": "#00FB8E",
+          }
+        },
+        {
+          "scope": [
+            "string",
+            "punctuation.definition.string.begin",
+            "punctuation.definition.string.end"
+          ],
+          "settings": {
+            "foreground": "#fde181",
+          }
+        },
+        {
+          "scope": [
+            "entity.name.tag"
+          ],
+          "settings": {
+            "foreground": "#ff6d03",
+          }
+        },
+        {
+          "scope": "entity.other.attribute-name.class.css",
+          "settings": {
+            "foreground": "#ff6d03",
+          }
+        },
+      ]
+    }
+  },
+  "indentRainbow.colors": [
+    "rgba(3,4,94,0.125)",
+    "rgba(2,62,138,0.125)",
+    "rgba(0,119,182,0.125)",
+    "rgba(0,150,199,0.125)",
+    "rgba(0,180,216,0.125)",
+    "rgba(72,202,228,0.125)",
+    "rgba(144,224,239,0.125)",
+    "rgba(0, 100, 102, 0.125)",
+    "rgba(6, 90, 96, 0.125)",
+    "rgba(11, 82, 91, 0.125)",
+    "rgba(20, 69, 82, 0.125)",
+    "rgba(27, 58, 75, 0.125)",
+    "rgba(33, 47, 69, 0.125)",
+    "rgba(39, 38, 64, 0.125)",
+    "rgba(49, 34, 68, 0.125)",
+    "rgba(62, 31, 71, 0.125)",
+    "rgba(77, 25, 77, 0.125)",
+  ],
+  "editor.tabCompletion": "on",
+  "explorer.confirmDelete": false,
+  "editor.wordWrap": "on",
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "all",
+  "turboConsoleLog.quote": "'",
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "vue-html": "html"
+  },
+  "emmet.triggerExpansionOnTab": true,
+  "editor.wordWrapColumn": 35,
+  "editor.letterSpacing": 1,
+  "editor.lineHeight": 36,
+  "editor.fontFamily": "'JetBrains Mono', 'Menlo'",
+  // "editor.fontFamily": "SF Mono, Source Code Pro, Input Mono, Inconsolata, Arial, Helvetica, sans-serif",
+  // "editor.fontFamily": "Helvetica, SF Mono, Source Code Pro, Input Mono, Inconsolata, Arial, sans-serif",
+  // "editor.fontFamily": "Consolas, 'Courier New', monospace",
+  "editor.tabSize": 2,
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "eslint.format.enable": true,
+  "workbench.editor.enablePreview": false,
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "liveServer.settings.donotShowInfoMsg": true,
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "liveServer.settings.donotVerifyTags": true,
+  "workbench.colorTheme": "Evondev Dracula Night Contrast",
+  "[scss]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
+  "editor.minimap.showSlider": "always",
+  "editor.stickyScroll.enabled": true,
+  "window.openWithoutArgumentsInNewWindow": "off",
+  "tabnine.experimentalAutoImports": true,
+  "terminal.integrated.fontFamily": "monospace",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.accessibilitySupport": "off",
+  "cSpell.userWords": [
+    "Flatpickr"
+  ],
+  "eslint.enable": true,
+  "workbench.editor.wrapTabs": true,
+  "aws.suppressPrompts": {
+    "codeWhispererConnectionExpired": true
+  },
+  "window.zoomLevel": -1
+}

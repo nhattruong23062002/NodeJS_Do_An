@@ -1,0 +1,395 @@
+.mtk3 {
+  font-weight: bold;
+  color: transparent;
+  background-image: linear-gradient(to right top, #c29ffd 50%, #ffb4dc);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+}
+
+.mtk15,
+.active-line-number {
+  font-weight: bold;
+  color: transparent;
+  background-image: linear-gradient(to right top, #fc6c8f, #ff2ced);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+}
+
+.mtk5 {
+  font-weight: bold;
+  color: transparent;
+  background-image: linear-gradient(to right top, #20e3b2 60%, #2cccff);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+}
+
+.mtk16 {
+  font-weight: bold;
+  color: transparent;
+  background-image: linear-gradient(to right top, #9a86fd, #6a5af9);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+}
+
+.mtk17 {
+  font-weight: bold;
+  color: transparent;
+  background-image: linear-gradient(to right bottom, #0c97fa, #16e1f5);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+}
+
+.monaco-editor .cursors-layer .cursor {
+  color: transparent;
+  background-image: linear-gradient(45, #6a5af9, #ff2ced, #ffb4dc);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+}
+
+.monaco-editor .cursors-layer .cursor {
+  background: #12c2e9;
+  background: -webkit-linear-gradient(to top, #f64f59, #c471ed, #12c2e9);
+  background: linear-gradient(to top, #f64f59, #c471ed, #12c2e9);
+}
+
+/* Consolas, 'Courier New', monospace */
+/* SF Mono, Source Code Pro, Input Mono, Inconsolata, Arial, Helvetica, sans-serif */
+
+/* .monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active
+  .label-name {
+  font-size: 15px;
+  text-align: center;
+  font-weight: 600;
+  text-shadow: 0 0 1rem var(--neon-text-color), 0 0 1rem var(--neon-text-color),
+    0 0 1rem var(--neon-text-color), 0 0 1rem var(--neon-text-color),
+    0 0 1rem var(--neon-text-color);
+}
+
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active.tab-border-top
+  > .tab-border-top-container {
+  background-image: linear-gradient(-45deg, #26cc58, #e73c7e, #23a6d5, #23d5ab);
+  height: 100%;
+  color: #ffff;
+  background-size: 400% 400%;
+  animation: gradient 2s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    opacity: 0.2;
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.2;
+    background-position: 0% 50%;
+  }
+}
+
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab
+  .tab-label
+  a {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active.tab-border-top
+  > .tab-border-top-container {
+  background-image: linear-gradient(-45deg, #26cc58, #e73c7e, #23a6d5, #23d5ab);
+  height: 100%;
+  color: #ffff;
+  background-size: 400% 400%;
+  animation: gradient 2s ease infinite;
+}
+
+.tab.tab-actions-right.sizing-fit.has-icon.active {
+  position: relative;
+  background: linear-gradient(to right, #20e3b2, #2cccff);
+  border-left: unset;
+  overflow: hidden !important;
+}
+
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title.tabs
+  .monaco-icon-label:after {
+  font-size: 15px;
+}
+
+.monaco-icon-name-container > .label-name {
+  font-family: 'JetBrains Mono', 'Menlo';
+}
+
+.tab.tab-actions-right.sizing-fit.has-icon.active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% - 8px);
+  height: calc(100% - 4px);
+
+  transform: translate(-50%, -50%);
+  z-index: 1;
+
+  background-color: black;
+
+  box-shadow: 0 12px 0px -10px black, 0 -12px 0px -10px black,
+    -15px 0 0 -10px black, 15px 0 0 -10px black !important;
+}
+
+.tab.tab-actions-right.sizing-fit.has-icon.active > * {
+  position: relative;
+  z-index: 2;
+} */
+
+/* BORDER-TOP */
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active.tab-border-top
+  > .tab-border-top-container {
+  background-size: 400% 400%;
+  background-image: linear-gradient(
+    -45deg,
+    #fc6c8f,
+    #ff2ced,
+    #ffb86c,
+    #2cccff,
+    #20e3b2,
+    #ffcc70,
+    #c850c0,
+    #4158d0
+  );
+  animation: gradient 5s ease alternate infinite;
+  height: 3px;
+}
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* CORNER-GRADIENT */
+/* :root {
+  --size: 5px;
+}
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active.tab-border-top
+  > .tab-border-top-container {
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: transparent;
+}
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active.tab-border-top
+  > .tab-border-top-container:before,
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active.tab-border-top
+  > .tab-border-top-container:after {
+  content: "";
+  width: var(--size);
+  height: var(--size);
+  position: absolute;
+  border: 2px solid;
+  border-image-slice: 1;
+}
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active.tab-border-top
+  > .tab-border-top-container:before {
+  top: 0;
+  left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-image-source: linear-gradient(-45deg, #4dd78a, #20e3b2);
+}
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active.tab-border-top
+  > .tab-border-top-container:after {
+  right: 0;
+  bottom: 0;
+  border-top: 0;
+  border-left: 0;
+  border-image-source: linear-gradient(-45deg, #6a5af9, #d66efd);
+}
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active:before,
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active:after {
+  content: "";
+  width: var(--size);
+  height: var(--size);
+  position: absolute;
+  border: 2px solid;
+  border-image-slice: 1;
+}
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active:before {
+  left: 0;
+  bottom: 0;
+  border-top: 0;
+  border-right: 0;
+  border-image-source: linear-gradient(-45deg, #fc6c8f, #ffb86c);
+}
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active:after {
+  top: 0;
+  right: 0;
+  border-left: 0;
+  border-bottom: 0;
+  border-image-source: linear-gradient(-45deg, #098dff, #2cccff);
+} */
+
+/* CUSTOM-TAB */
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container {
+  padding: 8px;
+  gap: 8px;
+}
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.sizing-fit {
+  background-color: #21222c !important;
+  border-radius: 4px;
+}
+.tab.tab-actions-right.sizing-fit.has-icon.tab-border-top.active .tab-label {
+  position: relative;
+}
+.tab.tab-actions-right.sizing-fit.has-icon.tab-border-top.active:before {
+  content: '';
+  position: absolute;
+  background: #21222c;
+  top: 50%;
+  left: 50%;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  border-radius: inherit;
+  transform: translate(-50.1%, -50.1%);
+  border-radius: inherit;
+}
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.sizing-fit.active {
+  background-image: linear-gradient(
+    45deg,
+    #fcb564,
+    #ff65f2,
+    #d66efd,
+    #6a5af9,
+    #2cccff,
+    #20e3b2
+  );
+}
+/* hide border top */
+.monaco-workbench
+  .part.editor
+  > .content
+  .editor-group-container
+  > .title
+  .tabs-container
+  > .tab.active.tab-border-top
+  > .tab-border-top-container {
+  display: none !important;
+}
