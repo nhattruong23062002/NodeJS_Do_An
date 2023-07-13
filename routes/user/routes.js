@@ -20,9 +20,9 @@ const productsRouter = require('./product/router');
 router.use('/employees', employeesRouter);
 router.use('/categories', categoriesRouter);
 // router.use('/categories', passport.authenticate('jwtUser', { session: false }), categoriesRouter);
-router.use('/customers', passport.authenticate('jwtUser', { session: false }), customersRouter);
+router.use('/customers', customersRouter);
 // router.use('/products', passport.authenticate('jwtUser', { session: false }), productsRouter);
 router.use('/products', productsRouter);
-router.use('/orders', ordersRouter);
+router.use('/orders', passport.authenticate('jwtUser', { session: false }),ordersRouter);
 
 module.exports = router;

@@ -46,7 +46,8 @@ const {
   bestseller,
   productlist,
   productSearch,
-  productSimilar
+  productSimilar,
+  filterCategory
 } = require('./controller');
 
 router.get('/1', question1);
@@ -90,6 +91,8 @@ router.get('/productlist', productlist);
 router.get('/productSearch', productSearch);
 router.get('/productSearch', productSearch);
 router.get('/productSimilar', productSimilar);
+router.get('/filterCategory', filterCategory);
+
 
 
 
