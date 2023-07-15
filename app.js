@@ -7,6 +7,8 @@ const cors = require('cors');
 const { default: mongoose } = require('mongoose');
 const passport = require('passport');
 
+
+
 require('dotenv').config()
 
 const { CONNECTION_STRING } = require('./constants/dbSettings');
@@ -17,6 +19,7 @@ const mediaRouter = require('./routes/media/router');
 
 const adminRoutes = require('./routes/admin/routes');
 const userRouter = require('./routes/user/routes');
+
 
 const app = express();
 
