@@ -4,7 +4,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const BasicStrategy = require('passport-http').BasicStrategy;
 
 const jwtSettings = require('../constants/jwtSetting');
-const { Employee } = require('../models');
+const { Customer } = require('../models');
 
 const passportConfigUser = new JwtStrategy(
   {
@@ -14,7 +14,7 @@ const passportConfigUser = new JwtStrategy(
   async (payload, done) => {
     console.log('««««« user »»»»»');
     try {
-      const user = await Employee.findById(payload._id).select('-password');
+      const user = await Customer.findById(payload._id).select('-password');
 
       if (!user) return done(null, false);
 
@@ -32,7 +32,7 @@ const passportConfigLocalUser = new LocalStrategy(
   async (email, password, done) => {
     try {
       console.log('««««« user »»»»»');
-      const user = await Employee.findOne({ email });
+      const user = await Customer.findOne({ email });
 
       if (!user) return done(null, false);
 

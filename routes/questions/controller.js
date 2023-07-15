@@ -1,4 +1,7 @@
 const { getQueryDateTime } = require('../../utils');
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
+
 
 const {
   Product,
@@ -1668,5 +1671,94 @@ module.exports = {
     }
   },
   
+  filterCategory: async (req, res, next) => {
+  try {
+    const { categoryIds, minPrice, maxPrice, sortBy } = req.query;
 
+    let categoryObjectIds = categoryIds.split(",").map((categoryId) => new ObjectId(categoryId));
+
+    let query = { categoryId: { $in: categoryObjectIds } };
+
+    if (minPrice && maxPrice) {
+      query.$expr = {
+        $and: [
+          {
+            $gte: [
+              { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
+              { $multiply: [Number(minPrice), 100] }
+            ]
+          },
+          {
+            $lte: [
+              { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
+              { $multiply: [Number(maxPrice), 100] }
+            ]
+          }
+        ]
+      };
+    } else if (minPrice) {
+      query.$expr = {
+        $gte: [
+          { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
+          { $multiply: [Number(minPrice), 100] }
+        ]
+      };
+    } else if (maxPrice) {
+      query.$expr = {
+        $lte: [
+          { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
+          { $multiply: [Number(maxPrice), 100] }
+        ]
+      };
+    }
+
+    let results;
+    if (sortBy === "discountLowToHigh") {
+      results = await Product.find(query).sort({ discount: 1 });
+    } else if (sortBy === "discountHighToLow") {
+      results = await Product.find(query).sort({ discount: -1 });
+    } else if (sortBy === "bestSelling") {
+      // Sử dụng câu truy vấn tìm sản phẩm bán chạy nhất như một subquery
+      const bestSellingProductIds = await Order.aggregate([
+        { $match: { status: "COMPLETED" } },
+        { $unwind: "$orderDetails" },
+        { $group: { _id: "$orderDetails.productId", totalQuantity: { $sum: "$orderDetails.quantity" } } },
+        { $sort: { totalQuantity: -1 } },
+        { $limit: 10 } // Lấy 10 sản phẩm bán chạy nhất
+      ]).exec(); // Sử dụng .exec() để thực hiện truy vấn và trả về kết quả dưới dạng mảng
+
+      const bestSellingIds = bestSellingProductIds.map((product) => product._id); // Sử dụng .map() trên mảng
+    
+      query._id = { $in: bestSellingIds };
+    
+      results = await Product.find(query);
+    }
+      else if (sortBy === "priceLowToHigh") {
+      results = await Product.find(query).sort({ price: 1 });
+    } else if (sortBy === "priceHighToLow") {
+      results = await Product.find(query).sort({ price: -1 });
+    }
+    else if (sortBy === "newest") {
+      results = await Product.find(query).sort({ createdAt: -1 });
+    } 
+     else {
+      results = await Product.find(query);
+    }
+
+    let total = results.length;
+
+    return res.send({
+      code: 200,
+      total,
+      totalResult: results.length,
+      payload: results,
+    });
+  } catch (err) {
+    console.log("««««« err »»»»»", err);
+    return res.status(500).json({ code: 500, error: err });
+  }
+},
+
+  
+  
 };

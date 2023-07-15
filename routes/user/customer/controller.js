@@ -1,7 +1,75 @@
 
 const { Customer } = require('../../../models');
+const jwtSettings = require('../../../constants/jwtSetting');
+const {generateToken,generateRefreshToken} = require('../../../helpers/jwtHelper');
+const JWT = require('jsonwebtoken');
 
 module.exports = {
+  login: async (req, res, next) => {
+    try {
+      const { email } = req.body;
+
+      const customer = await Customer.findOne({ email }).select('-password').lean();
+
+      console.log('««««« customer »»»»»', customer);
+
+      const token = generateToken(customer, jwtSettings.USER_SECRET);
+      
+      const refreshToken = generateRefreshToken(customer._id, jwtSettings.USER_SECRET);
+
+      return res.status(200).json({
+        token,
+        refreshToken,
+      });
+    } catch (err) {
+      res.status(400).json({
+        statusCode: 400,
+        message: 'Looi',
+      });
+    }
+  },
+
+  checkRefreshToken: async (req, res, next) => {
+    try {
+      const { refreshToken } = req.body;
+
+      JWT.verify(refreshToken, jwtSettings.ADMIN_SECRET, async (err, decoded) => {
+        if (err) {
+          return res.status(401).json({
+            message: 'refreshToken is invalid',
+          });
+        } else {
+          console.log('««««« decoded »»»»»', decoded);
+          const { id } = decoded;
+
+          const employee = await Employee.findById(id).select('-password').lean();
+
+          if (employee && employee.isActive) {
+            const token = generateToken(employee, jwtSettings.ADMIN_SECRET);
+            
+            return res.status(200).json({ token });
+          }
+          return res.sendStatus(401);
+        }
+      });
+    } catch (err) {
+      res.status(400).json({
+        statusCode: 400,
+        message: 'Lỗi',
+      });
+    }
+  },
+
+  getMe: async (req, res, next) => {
+    try {
+      res.status(200).json({
+        payload: req.user,
+      });
+    } catch (err) {
+      res.sendStatus(500);
+    }
+  },
+
   getAll: async (req, res, next) => {
     try {
       let results = await Customer.find()

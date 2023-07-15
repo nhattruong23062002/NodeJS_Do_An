@@ -28,8 +28,7 @@ const productSchema = Schema(
     supplierId: { type: Schema.Types.ObjectId, ref: 'Supplier', required: true },
   },
   {
-    versionKey: false,
-    timeStamp: true,
+    timestamps: true,
   },
 );
 
