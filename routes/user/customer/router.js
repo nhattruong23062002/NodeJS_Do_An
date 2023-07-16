@@ -13,6 +13,8 @@ const {
   create,
   remove,
   update,
+  forgotPassword,
+  resetPassword
 } = require("./controller");
 
 const {
@@ -32,6 +34,11 @@ router
   );
 
 router.route("/refresh-token").post(checkRefreshToken);
+
+router.route("/forgotPassword").post(forgotPassword);
+router.route("/resetPassword/:token").post(resetPassword);
+
+
 
 
 router

@@ -3,15 +3,124 @@ const { Customer } = require('../../../models');
 const jwtSettings = require('../../../constants/jwtSetting');
 const {generateToken,generateRefreshToken} = require('../../../helpers/jwtHelper');
 const JWT = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const bcrypt = require("bcryptjs");
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'nhattr2306@gmail.com', // Thay thế bằng email của bạn để gửi yêu cầu đặt lại mật khẩu
+    pass: 'mkjtvaunyizktgtp', // Thay thế bằng mật khẩu email của bạn
+  },
+});
 
 module.exports = {
+
+  resetPassword : async (req, res,next) => {
+    try {
+      const { token } = req.params;
+      const { password } = req.body;
+  
+      // Giải mã token để lấy email của người dùng
+      const decodedToken = JWT.verify(token, jwtSettings.USER_SECRET);
+      const email = decodedToken.email;
+
+  
+      // Tìm kiếm người dùng dựa vào email
+      const customer = await Customer.findOne({ email }).maxTimeMS(200000);
+      console.log('««««« customer »»»»»', customer);
+  
+      if (!customer) {
+        return res.status(404).json({
+          statusCode: 404,
+          message: "Không tìm thấy người dùng với email đã cung cấp.",
+        });
+      }
+  
+      // Mã hóa mật khẩu mới
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+  
+      // Cập nhật mật khẩu mới cho người dùng
+      customer.password = hashedPassword;
+      await customer.save();
+  
+      return res.status(200).json({
+        statusCode: 200,
+        message: "Mật khẩu đã được đặt lại thành công.",
+      });
+    } catch (err) {
+      console.log("Error:", err);
+      res.status(500).json({
+        statusCode: 500,
+        message: "Đã có lỗi xảy ra. Vui lòng thử lại sau.",
+      });
+    }
+  },
+
+  forgotPassword : async (req, res, next) => {
+    try {
+      const { email } = req.body;
+  
+      // Tìm kiếm nhân viên dựa vào email
+      const customer = await Customer.findOne({ email }).select('-password').lean();
+
+  
+      if (!customer) {
+        return res.status(404).json({
+          statusCode: 404,
+          message: 'Không tìm thấy người dùng với email đã cung cấp.',
+        });
+      }
+  
+      // Tạo mã token duy nhất
+      const token = generateToken({ email: customer.email }, jwtSettings.USER_SECRET, { expiresIn: '15m' });
+
+      console.log('««««« token »»»»»', token);
+  
+      // Gửi email chứa URL đặt lại mật khẩu
+      const mailOptions = {
+        from: 'nhattr2306@gmail.com', // Thay thế bằng email của bạn
+        to: customer.email,
+        subject: 'Yêu cầu đặt lại mật khẩu',
+        html: `
+          <p>Xin chào,</p>
+          <p>Bạn đã yêu cầu đặt lại mật khẩu từ Chung_Store.Vui lòng nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:</p>
+          <p><a href="http://localhost:3000/resetPassword?token=${token}">Đặt lại mật khẩu</a></p>
+          <p>Trân trọng,</p>
+          <p>Đội ngũ của chúng tôi</p>
+        `,
+      };
+  
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log('Error sending email:', error);
+          return res.status(500).json({
+            statusCode: 500,
+            message: 'Đã có lỗi xảy ra khi gửi email. Vui lòng thử lại sau.',
+          });
+        }
+        console.log('Email sent: ' + info.response);
+        return res.status(200).json({
+          statusCode: 200,
+          message: 'Một email chứa liên kết đặt lại mật khẩu đã được gửi đến địa chỉ email của bạn.',
+        });
+      });
+    } catch (err) {
+      console.log('Error:', err);
+      res.status(500).json({
+        statusCode: 500,
+        message: 'Đã có lỗi xảy ra. Vui lòng thử lại sau.',
+      });
+    }
+  },
+
+
   login: async (req, res, next) => {
     try {
       const { email } = req.body;
 
       const customer = await Customer.findOne({ email }).select('-password').lean();
-
-      console.log('««««« customer »»»»»', customer);
 
       const token = generateToken(customer, jwtSettings.USER_SECRET);
       
@@ -33,7 +142,7 @@ module.exports = {
     try {
       const { refreshToken } = req.body;
 
-      JWT.verify(refreshToken, jwtSettings.ADMIN_SECRET, async (err, decoded) => {
+      JWT.verify(refreshToken, jwtSettings.USER_SECRET, async (err, decoded) => {
         if (err) {
           return res.status(401).json({
             message: 'refreshToken is invalid',
@@ -42,10 +151,10 @@ module.exports = {
           console.log('««««« decoded »»»»»', decoded);
           const { id } = decoded;
 
-          const employee = await Employee.findById(id).select('-password').lean();
+          const customer = await Customer.findById(id).select('-password').lean();
 
-          if (employee && employee.isActive) {
-            const token = generateToken(employee, jwtSettings.ADMIN_SECRET);
+          if (customer && customer.isActive) {
+            const token = generateToken(customer, jwtSettings.USER_SECRET);
             
             return res.status(200).json({ token });
           }
