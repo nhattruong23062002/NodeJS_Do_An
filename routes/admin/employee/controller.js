@@ -3,6 +3,7 @@ const JWT = require('jsonwebtoken');
 const { Employee } = require('../../../models');
 const { generateToken, generateRefreshToken } = require('../../../helpers/jwtHelper');
 const jwtSettings = require('../../../constants/jwtSetting');
+const { emit } = require('../../../models/Employee');
 
 module.exports = {
   login: async (req, res, next) => {
@@ -17,6 +18,7 @@ module.exports = {
       return res.status(200).json({
         token,
         refreshToken,
+        user: employee,
       });
     } catch (err) {
       res.status(400).json({
