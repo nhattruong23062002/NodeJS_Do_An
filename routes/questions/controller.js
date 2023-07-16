@@ -1527,7 +1527,7 @@ module.exports = {
   flashsale: async (req, res, next) => {
     try {
       const conditionFind = {
-        discount: { $gt: 0 },
+        discount: { $gt: 10 },
       };
 
       let results = await Product.find(conditionFind).sort({ discount: -1 });

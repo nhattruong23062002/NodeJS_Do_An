@@ -95,6 +95,11 @@ const orderSchema = new Schema(
 
     // Array
     orderDetails: [orderDetailSchema],
+    isDelete: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
   },
   {
     versionKey: false,
