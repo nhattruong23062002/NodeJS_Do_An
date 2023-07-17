@@ -37,12 +37,8 @@ module.exports = {
         });
       }
   
-      // Mã hóa mật khẩu mới
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-  
       // Cập nhật mật khẩu mới cho người dùng
-      customer.password = hashedPassword;
+      customer.password = password;
       await customer.save();
   
       return res.status(200).json({

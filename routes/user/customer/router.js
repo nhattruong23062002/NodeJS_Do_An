@@ -3,7 +3,7 @@ const passport = require("passport");
 const router = express.Router();
 
 const { validateSchema } = require("../../../utils");
-const { loginSchema, getDetailSchema, createSchema } = require("./validations");
+const { loginSchema, getDetailSchema, createSchema ,resetPasswordSchema} = require("./validations");
 const {
   login,
   checkRefreshToken,

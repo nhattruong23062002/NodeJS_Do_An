@@ -58,6 +58,7 @@ const customerSchema = new Schema(
     password: {
       type: String,
       minLength: [6, 'Mật khẩu phải có tối thiểu 6 kí tự'],
+      manLength: [12, 'Mật khẩu phải có tối thiểu 12 kí tự'],
       required: [true, 'Mật khẩu không được bỏ trống'],
     },
   },
