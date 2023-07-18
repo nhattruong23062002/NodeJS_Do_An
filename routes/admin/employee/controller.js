@@ -4,6 +4,7 @@ const { Employee } = require('../../../models');
 const { generateToken, generateRefreshToken } = require('../../../helpers/jwtHelper');
 const jwtSettings = require('../../../constants/jwtSetting');
 const { emit } = require('../../../models/Employee');
+const { hashPassword } = require('../../../helpers/authHelper');
 
 module.exports = {
   login: async (req, res, next) => {
@@ -25,6 +26,45 @@ module.exports = {
         statusCode: 400,
         message: 'Looi',
       });
+    }
+  },
+
+  forgotPassword: async (req,res,next) =>{
+    try {
+      const {email,question,newPassword} = req.body
+      if (!email){
+        res.status(400).send({ message: 'Email is required'})
+      }
+      if (!question){
+        res.status(400).send({ message: 'question is required'})
+      }
+      if (!newPassword){
+        res.status(400).send({ message: 'new password is required'})
+      }
+      //check
+      const employee = await Employee.findOne({email,question})
+      //validation
+      if(!employee){
+        return res.status(404).send({
+          success: false,
+          message: 'Wrong Email or question',
+        });
+      }
+      const hashed = await hashPassword(newPassword)
+      await Employee.findByIdAndUpdate(employee._id,{password:hashed})
+      res.status(200).send(
+        {
+          success: true,
+          message: 'Password Reset Successfully',
+        }
+      );
+    } catch (error) {
+      console.log(error)
+      res.status(500).send({
+        success: false,
+        message: 'somthing went wrong',
+        error
+      })
     }
   },
 
