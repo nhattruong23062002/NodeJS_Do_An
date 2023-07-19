@@ -76,13 +76,11 @@ module.exports = {
       email: yup
         .string()
         .required()
-        // .email()
         .test("email type", "${path} Không phải email hợp lệ", (value) => {
           const emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
 
           return emailRegex.test(value);
         }),
-
       phoneNumber: yup
         .string()
         .required()
@@ -101,6 +99,12 @@ module.exports = {
         .string()
         .required()
         .max(500, "Địa chỉ không được vượt quá 500 ký tự"),
+      password: yup
+        .string()
+        .required()
+        .min(6, "Mật khẩu phải tối thiểu 6 ký tự")
+        .max(12, "Mật khẩu tối đa chỉ 12 ký tự"),
+     
 
       birthday: yup.date(),
     }),

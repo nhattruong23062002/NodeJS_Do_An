@@ -45,7 +45,9 @@ router
   .route("/profile") // Đối tượng cần kiểm tra là token có hợp lệ hay không
   .get(passport.authenticate("jwtAdmin", { session: false }), getMe);
 
-router.route("/").get(getAll).post(validateSchema(createSchema), create);
+router.route("/")
+  .get(getAll)
+  .post(validateSchema(createSchema), create);
 
 router
   .route("/:id")

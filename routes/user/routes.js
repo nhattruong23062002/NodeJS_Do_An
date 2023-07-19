@@ -16,7 +16,10 @@ const customersRouter = require('./customer/router');
 const employeesRouter = require('./employee/router');
 const ordersRouter = require('./order/router');
 const productsRouter = require('./product/router');
+const cartRouter = require('./cart/router');
 
+
+router.use('/cart', passport.authenticate('jwtUser', { session: false }), cartRouter);
 router.use('/employees', employeesRouter);
 router.use('/categories', categoriesRouter);
 // router.use('/categories', passport.authenticate('jwtUser', { session: false }), categoriesRouter);
