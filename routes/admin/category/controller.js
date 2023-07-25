@@ -39,7 +39,7 @@ module.exports = {
   
       let result = await newItem.save();
   
-      return res.send({ code: 200, message: 'Tạo thành công', payload: result });
+      return res.send({ code: 200,success: true , message: 'Tạo thành công', payload: result });
     } catch (err) {
       console.log('««««« err »»»»»', err);
       return res.status(500).json({ code: 500, error: err });
@@ -53,7 +53,7 @@ module.exports = {
       let found = await Category.findByIdAndDelete(id);
   
       if (found) {
-        return res.send({ code: 200, payload: found, message: 'Xóa thành công' });
+        return res.send({ code: 200,success:  true , payload: found, message: 'Xóa thành công' });
       }
   
       return res.status(410).send({ code: 404, message: 'Không tìm thấy' });
@@ -75,6 +75,7 @@ module.exports = {
           code: 200,
           message: 'Cập nhật thành công',
           payload: found,
+          success:true,
         });
       }
   
