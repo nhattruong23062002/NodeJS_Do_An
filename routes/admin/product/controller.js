@@ -7,6 +7,9 @@ module.exports = {
       let results = await Product.find()
         .populate('category')
         .populate('supplier');
+      
+      // Thêm header Cache-Control vào phản hồi
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
   
       return res.send({ code: 200, payload: results });
     } catch (err) {
