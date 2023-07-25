@@ -3,7 +3,7 @@ const passport = require("passport");
 const router = express.Router();
 
 const { validateSchema } = require("../../../utils");
-const { loginSchema, getDetailSchema, createSchema ,resetPasswordSchema} = require("./validations");
+const { loginSchema, getDetailSchema, createSchema ,resetPasswordSchema,patchSchema} = require("./validations");
 const {
   login,
   checkRefreshToken,
@@ -43,7 +43,7 @@ router.route("/resetPassword/:token").post(resetPassword);
 
 router
   .route("/profile") // Đối tượng cần kiểm tra là token có hợp lệ hay không
-  .get(passport.authenticate("jwtAdmin", { session: false }), getMe);
+  .get(passport.authenticate("jwtUser", { session: false }), getMe);
 
 router.route("/")
   .get(getAll)
@@ -52,7 +52,7 @@ router.route("/")
 router
   .route("/:id")
   .get(validateSchema(getDetailSchema), getDetail)
-  .patch(validateSchema(createSchema), update)
+  .patch(validateSchema(patchSchema), update)
   .delete(validateSchema(getDetailSchema), remove);
 
 module.exports = router;

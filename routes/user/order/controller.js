@@ -4,7 +4,7 @@ const { asyncForEach } = require('../../../utils');
 module.exports = {
   getAll: async (req, res, next) => {
     try {
-      let results = await Order.find();
+      let results = await Order.find().populate("orderDetails.productId");
 
       return res.send({ code: 200, payload: results });
     } catch (err) {

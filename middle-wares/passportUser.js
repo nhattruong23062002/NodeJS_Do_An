@@ -12,7 +12,6 @@ const passportConfigUser = new JwtStrategy(
     secretOrKey: jwtSettings.USER_SECRET,
   },
   async (payload, done) => {
-    console.log('««««« user »»»»»');
     try {
       const user = await Customer.findById(payload._id).select('-password');
 
@@ -31,7 +30,6 @@ const passportConfigLocalUser = new LocalStrategy(
   },
   async (email, password, done) => {
     try {
-      console.log('««««« user »»»»»');
       const user = await Customer.findOne({ email });
 
       if (!user) return done(null, false);

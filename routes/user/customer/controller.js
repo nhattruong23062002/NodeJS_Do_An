@@ -262,7 +262,7 @@ module.exports = {
       const { id } = req.params;  
       const updateData = req.body;
       
-      const { email, phoneNumber, address } = updateData;
+     /*  const { email, phoneNumber, address } = updateData;
 
       const getEmailExits = Customer.find({ email });
       const getPhoneExits = Customer.find({ phoneNumber });
@@ -270,9 +270,7 @@ module.exports = {
 
       const [foundEmail, foundPhoneNumber, foundAddress] = await Promise.all([getEmailExits, getPhoneExits, getAddressExits]);
 
-      const errors = [];
       if (foundEmail && foundEmail.length > 0) errors.push('Email đã tồn tại');
-      // if (!isEmpty(foundEmail)) errors.push('Email đã tồn tại');
       if (foundPhoneNumber && foundPhoneNumber.length > 0) errors.push('Số điện thoại đã tồn tại');
       if (foundAddress && foundAddress.length > 0) errors.push('Địa chỉ đã tồn tại');
 
@@ -282,7 +280,8 @@ module.exports = {
           message: "Không thành công",
           errors,
         });
-      }
+      } */
+      const errors = [];
 
       const found = await Customer.findByIdAndUpdate(id, updateData, {
         new: true,
