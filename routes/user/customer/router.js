@@ -14,7 +14,8 @@ const {
   remove,
   update,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  changePassword
 } = require("./controller");
 
 const {
@@ -37,6 +38,7 @@ router.route("/refresh-token").post(checkRefreshToken);
 
 router.route("/forgotPassword").post(forgotPassword);
 router.route("/resetPassword/:token").post(resetPassword);
+router.route("/changePassword/:token").post(changePassword);
 
 
 

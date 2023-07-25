@@ -16,6 +16,52 @@ const transporter = nodemailer.createTransport({
 
 module.exports = {
 
+  changePassword: async (req, res, next) => {
+    try {
+      const { token } = req.params;
+      const { currentPassword, newPassword } = req.body;
+
+      // Giải mã token để lấy email của người dùng
+      const decodedToken = JWT.verify(token, jwtSettings.USER_SECRET);
+      const email = decodedToken.email;
+
+      // Tìm kiếm người dùng dựa vào email
+      const customer = await Customer.findOne({ email }).maxTimeMS(200000);
+      console.log('««««« customer »»»»»', customer);
+
+      if (!customer) {
+        return res.status(404).json({
+          statusCode: 404,
+          message: "Không tìm thấy người dùng với email đã cung cấp.",
+        });
+      }
+
+      // Kiểm tra mật khẩu hiện tại của người dùng
+      const isMatch = await bcrypt.compare(currentPassword, customer.password);
+      if (!isMatch) {
+        return res.status(401).json({
+          statusCode: 401,
+          message: "Mật khẩu hiện tại không đúng.",
+        });
+      }
+      
+       // Cập nhật mật khẩu mới cho người dùng
+      customer.password = newPassword;
+      await customer.save();
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: "Mật khẩu đã được thay đổi thành công.",
+      });
+    } catch (err) {
+      console.log("Error:", err);
+      res.status(500).json({
+        statusCode: 500,
+        message: "Đã có lỗi xảy ra. Vui lòng thử lại sau.",
+      });
+    }
+  },
+
   resetPassword : async (req, res,next) => {
     try {
       const { token } = req.params;
