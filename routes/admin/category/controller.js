@@ -5,8 +5,12 @@ module.exports = {
   getAll: async (req, res, next) => {
     try {
       let results = await Category.find()
+
+      // Thêm header Cache-Control vào phản hồi
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
   
       return res.send({ code: 200, payload: results });
+      
     } catch (err) {
       return res.status(500).json({ code: 500, error: err });
     }
@@ -78,7 +82,8 @@ module.exports = {
           success:true,
         });
       }
-  
+
+      
       return res.status(410).send({ code: 400, message: 'Không tìm thấy' });
     } catch (error) {
       return res.status(500).json({ code: 500, error: err });

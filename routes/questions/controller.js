@@ -1696,7 +1696,7 @@ module.exports = {
           }
         ]
       };
-    } else if (minPrice) {
+    } else if (minPrice) { 
       query.$expr = {
         $gte: [
           { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
