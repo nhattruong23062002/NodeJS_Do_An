@@ -59,6 +59,11 @@ const employeeSchema = new Schema(
       maxLength: [12, 'Mật khẩu không được vượt quá 12 ký tự'],
       required: [true, 'Mật khẩu không được bỏ trống'],
     },
+    sex: {
+      type: String,
+      maxLength: [6, 'Mật khẩu không được vượt quá 6 ký tự'],
+      required: true,
+    },
     isActive: {
       type: Boolean,
       default: true,
