@@ -47,7 +47,11 @@ const {
   productlist,
   productSearch,
   productSimilar,
-  filterCategory
+  filterCategory,
+  totalstaff,
+  grossproduct,
+  totalorder,
+  totalIncome,
 } = require('./controller');
 
 router.get('/1', question1);
@@ -92,10 +96,10 @@ router.get('/productSearch', productSearch);
 router.get('/productSearch', productSearch);
 router.get('/productSimilar', productSimilar);
 router.get('/filterCategory', filterCategory);
-
-
-
-
+router.get('/totalstaff', totalstaff);
+router.get('/grossproduct', grossproduct);
+router.get('/totalorder', totalorder);
+router.get('/totalIncome', totalIncome);
 
 
 

@@ -1,7 +1,6 @@
-const { getQueryDateTime } = require('../../utils');
-const mongoose = require('mongoose');
+const { getQueryDateTime } = require("../../utils");
+const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
-
 
 const {
   Product,
@@ -9,7 +8,8 @@ const {
   Supplier,
   Customer,
   Order,
-} = require('../../models');
+  Employee,
+} = require("../../models");
 
 module.exports = {
   question1: async (req, res, next) => {
@@ -18,7 +18,7 @@ module.exports = {
         discount: { $lte: 10 },
       };
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Product.find(conditionFind);
       let total = await Product.countDocuments();
@@ -42,23 +42,23 @@ module.exports = {
 
       if (discount) {
         switch (type) {
-          case 'eq':
+          case "eq":
             conditionFind.discount = { $eq: discount };
             break;
 
-          case 'lt':
+          case "lt":
             conditionFind.discount = { $lt: discount };
             break;
 
-          case 'lte':
+          case "lte":
             conditionFind.discount = { $lte: discount };
             break;
 
-          case 'gt':
+          case "gt":
             conditionFind.discount = { $gt: discount };
             break;
 
-          case 'gte':
+          case "gte":
             conditionFind.discount = { $gte: discount };
             break;
 
@@ -68,7 +68,7 @@ module.exports = {
         }
       }
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Product.find(conditionFind);
       let total = await Product.countDocuments();
@@ -90,11 +90,11 @@ module.exports = {
         discount: { $lte: 10 },
       };
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Product.find(conditionFind)
-        .populate('supplier')
-        .populate('category')
+        .populate("supplier")
+        .populate("category")
         .lean();
 
       let total = await Product.countDocuments();
@@ -116,7 +116,7 @@ module.exports = {
         stock: { $lte: 5 },
       };
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Product.find(conditionFind).lean();
 
@@ -139,11 +139,11 @@ module.exports = {
         stock: { $lte: 5 },
       };
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Product.find(conditionFind)
-        .populate('supplier')
-        .populate('category')
+        .populate("supplier")
+        .populate("category")
         .lean();
 
       let total = await Product.countDocuments();
@@ -162,18 +162,18 @@ module.exports = {
   question3: async (req, res, next) => {
     try {
       // let discountedPrice = price * (100 - discount) / 100;
-      const s = { $subtract: [100, '$discount'] }; // (100 - 10) s => 90
+      const s = { $subtract: [100, "$discount"] }; // (100 - 10) s => 90
 
-      const m = { $multiply: ['$price', s] }; // price * 90
+      const m = { $multiply: ["$price", s] }; // price * 90
 
       const d = { $divide: [m, 100] }; // price * 90 / 100
 
       const conditionFind = { $expr: { $lte: [d, parseFloat(40000)] } };
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Product.find(conditionFind)
-        .select('-categoryId -supplierId -description')
+        .select("-categoryId -supplierId -description")
         .lean(); // convert data to object
 
       // const newResults = results.map((item) => {
@@ -201,9 +201,9 @@ module.exports = {
 
   question3a: async (req, res, next) => {
     try {
-      const s = { $subtract: [100, '$discount'] }; // (100 - 10) s => 90
+      const s = { $subtract: [100, "$discount"] }; // (100 - 10) s => 90
 
-      const m = { $multiply: ['$price', s] }; // price * 90
+      const m = { $multiply: ["$price", s] }; // price * 90
 
       const d = { $divide: [m, 100] }; // price * 90 / 100
 
@@ -211,7 +211,7 @@ module.exports = {
 
       const conditionFind = { $expr: { $lte: [d, parseFloat(price)] } };
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Product.find(conditionFind).lean(); // convert data to object
 
@@ -230,8 +230,8 @@ module.exports = {
 
   question3b: async (req, res, next) => {
     try {
-      const s = { $subtract: [100, '$discount'] }; // (100 - 10) s => 90
-      const m = { $multiply: ['$price', s] }; // price * 90
+      const s = { $subtract: [100, "$discount"] }; // (100 - 10) s => 90
+      const m = { $multiply: ["$price", s] }; // price * 90
       const d = { $divide: [m, 100] }; // price * 90 / 100
 
       // let results = await Product.aggregate([
@@ -260,8 +260,8 @@ module.exports = {
 
   question3c: async (req, res, next) => {
     try {
-      const s = { $subtract: [100, '$discount'] }; // (100 - 10) s => 90
-      const m = { $multiply: ['$price', s] }; // price * 90
+      const s = { $subtract: [100, "$discount"] }; // (100 - 10) s => 90
+      const m = { $multiply: ["$price", s] }; // price * 90
       const d = { $divide: [m, 100] }; // price * 90 / 100
 
       // let results = await Product.aggregate([
@@ -280,7 +280,7 @@ module.exports = {
 
       let results = await Product.aggregate()
         .addFields({ disPrice: d })
-        .match({ $expr: { $lte: ['$disPrice', parseFloat(40000)] } })
+        .match({ $expr: { $lte: ["$disPrice", parseFloat(40000)] } })
         .project({
           categoryId: 0,
           supplierId: 0,
@@ -296,7 +296,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -306,12 +306,12 @@ module.exports = {
       const { address } = req.query;
 
       const conditionFind = {
-        address: { $regex: new RegExp(`${address}`), $options: 'i' },
+        address: { $regex: new RegExp(`${address}`), $options: "i" },
       };
       // const conditionFind = { address: new RegExp(`${address}`) };
       // const conditionFind = { address: {$eq: address } };
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Customer.find(conditionFind);
 
@@ -324,7 +324,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -338,7 +338,7 @@ module.exports = {
       // const conditionFind = { address: {$eq: address } };
 
       let results = await Customer.aggregate().match({
-        address: { $regex: new RegExp(`${address}`), $options: 'i' },
+        address: { $regex: new RegExp(`${address}`), $options: "i" },
       });
 
       let total = await Customer.countDocuments();
@@ -350,7 +350,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -361,11 +361,11 @@ module.exports = {
 
       const conditionFind = {
         $expr: {
-          $eq: [{ $year: '$birthday' }, year],
+          $eq: [{ $year: "$birthday" }, year],
         },
       };
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Customer.find(conditionFind);
 
@@ -378,7 +378,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -398,9 +398,9 @@ module.exports = {
         $expr: {
           $and: [
             {
-              $eq: [{ $dayOfMonth: '$birthday' }, { $dayOfMonth: today }],
+              $eq: [{ $dayOfMonth: "$birthday" }, { $dayOfMonth: today }],
             },
-            { $eq: [{ $month: '$birthday' }, { $month: today }] },
+            { $eq: [{ $month: "$birthday" }, { $month: today }] },
           ],
         },
       };
@@ -416,7 +416,7 @@ module.exports = {
       //   },
       // };
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Customer.find(conditionFind);
 
@@ -429,7 +429,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -439,11 +439,11 @@ module.exports = {
       const { status } = req.query;
 
       let results = await Order.find({ status }) // ~ match
-        .populate({ path: 'customer', select: 'firstName lastName' }) // select để chọn lọc dữ liệu trả về
+        .populate({ path: "customer", select: "firstName lastName" }) // select để chọn lọc dữ liệu trả về
         // .populate('customer')
-        .populate('employee')
+        .populate("employee")
         .populate({
-          path: 'orderDetails.product',
+          path: "orderDetails.product",
           select: { name: 1, stock: 1 },
         })
         .lean();
@@ -457,7 +457,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -469,19 +469,19 @@ module.exports = {
       let results = await Order.aggregate()
         .match({ status }) // ~ find
         .lookup({
-          from: 'customers',
-          localField: 'customerId',
-          foreignField: '_id',
-          as: 'Customer',
+          from: "customers",
+          localField: "customerId",
+          foreignField: "_id",
+          as: "Customer",
         })
-        .unwind('Customer')
+        .unwind("Customer")
         .lookup({
-          from: 'employees',
-          localField: 'employeeId',
-          foreignField: '_id',
-          as: 'employee',
+          from: "employees",
+          localField: "employeeId",
+          foreignField: "_id",
+          as: "employee",
         })
-        .unwind('employee')
+        .unwind("employee")
         .project({
           customerId: 0,
           employeeId: 0,
@@ -516,7 +516,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -532,15 +532,15 @@ module.exports = {
             // { $eq: ['$status', status] },
             { status },
             {
-              $eq: [{ $dayOfMonth: '$shippedDate' }, { $dayOfMonth: findDate }],
+              $eq: [{ $dayOfMonth: "$shippedDate" }, { $dayOfMonth: findDate }],
             },
-            { $eq: [{ $month: '$shippedDate' }, { $month: findDate }] },
-            { $eq: [{ $year: '$shippedDate' }, { $year: findDate }] },
+            { $eq: [{ $month: "$shippedDate" }, { $month: findDate }] },
+            { $eq: [{ $year: "$shippedDate" }, { $year: findDate }] },
           ],
         },
       };
 
-      console.log('««««« conditionFind »»»»»', conditionFind);
+      console.log("««««« conditionFind »»»»»", conditionFind);
 
       let results = await Order.find(conditionFind).lean();
 
@@ -553,7 +553,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -569,18 +569,18 @@ module.exports = {
       tmpToDate.setHours(0, 0, 0, 0);
       toDate = new Date(tmpToDate.setDate(tmpToDate.getDate() + 1));
 
-      const compareStatus = { $eq: ['$status', status] };
-      const compareFromDate = { $gte: ['$shippedDate', fromDate] };
-      const compareToDate = { $lt: ['$shippedDate', toDate] };
+      const compareStatus = { $eq: ["$status", status] };
+      const compareFromDate = { $gte: ["$shippedDate", fromDate] };
+      const compareToDate = { $lt: ["$shippedDate", toDate] };
 
       const conditionFind = {
         $expr: { $and: [compareStatus, compareFromDate, compareToDate] },
       };
 
       let results = await Order.find(conditionFind)
-        .populate('orderDetails.product')
-        .populate('customer')
-        .populate('employee')
+        .populate("orderDetails.product")
+        .populate("customer")
+        .populate("employee")
         .lean();
 
       let total = await Order.countDocuments();
@@ -592,7 +592,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -603,16 +603,16 @@ module.exports = {
 
       let results = await Order.aggregate()
         .lookup({
-          from: 'customers',
-          localField: 'customerId',
-          foreignField: '_id',
-          as: 'customer',
+          from: "customers",
+          localField: "customerId",
+          foreignField: "_id",
+          as: "customer",
         })
-        .unwind('customer')
+        .unwind("customer")
         .match({
-          'customer.address': {
+          "customer.address": {
             $regex: new RegExp(`${address}`),
-            $options: 'i',
+            $options: "i",
           },
         })
         .project({
@@ -629,7 +629,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -653,7 +653,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -668,22 +668,22 @@ module.exports = {
         //   as: 'customer'
         // })
         .lookup({
-          from: 'products',
-          localField: '_id', // TRUY VẤN NGƯỢC!!!
-          foreignField: 'categoryId',
-          as: 'products',
+          from: "products",
+          localField: "_id", // TRUY VẤN NGƯỢC!!!
+          foreignField: "categoryId",
+          as: "products",
         })
         // .unwind('products') //   sẽ dẫn dến thiếu dự liệu
         .unwind({
-          path: '$products',
+          path: "$products",
           preserveNullAndEmptyArrays: true,
         })
         .group({
-          _id: '$_id',
-          name: { $first: '$name' },
-          description: { $first: '$description' },
+          _id: "$_id",
+          name: { $first: "$name" },
+          description: { $first: "$description" },
           totalProduct: {
-            $sum: '$products.stock',
+            $sum: "$products.stock",
           },
         })
         .sort({
@@ -700,7 +700,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -709,20 +709,20 @@ module.exports = {
     try {
       let results = await Supplier.aggregate()
         .lookup({
-          from: 'products',
-          localField: '_id',
-          foreignField: 'supplierId',
-          as: 'products',
+          from: "products",
+          localField: "_id",
+          foreignField: "supplierId",
+          as: "products",
         })
         .unwind({
-          path: '$products',
+          path: "$products",
           preserveNullAndEmptyArrays: true,
         })
         .group({
-          _id: '$_id',
-          name: { $first: '$name' },
+          _id: "$_id",
+          name: { $first: "$name" },
           totalProduct: {
-            $sum: '$products.stock',
+            $sum: "$products.stock",
           },
           // count: {$cond: { if: {$gt: ['$products', 0]}, then: 1, else: 0} }
           // count: {
@@ -748,7 +748,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -761,22 +761,22 @@ module.exports = {
       let results = await Order.aggregate()
         .match({
           ...conditionFind,
-          status: { $in: ['COMPLETE'] },
+          status: { $in: ["COMPLETE"] },
         })
-        .unwind('orderDetails')
+        .unwind("orderDetails")
         .lookup({
-          from: 'products',
-          localField: 'orderDetails.productId',
-          foreignField: '_id',
-          as: 'orderDetails.product',
+          from: "products",
+          localField: "orderDetails.productId",
+          foreignField: "_id",
+          as: "orderDetails.product",
         })
-        .unwind('orderDetails.product')
+        .unwind("orderDetails.product")
         .group({
-          _id: '$orderDetails.productId',
-          name: { $first: '$orderDetails.product.name' },
-          price: { $first: '$orderDetails.product.price' },
-          discount: { $first: '$orderDetails.product.discount' },
-          stock: { $first: '$orderDetails.product.stock' },
+          _id: "$orderDetails.productId",
+          name: { $first: "$orderDetails.product.name" },
+          price: { $first: "$orderDetails.product.price" },
+          discount: { $first: "$orderDetails.product.discount" },
+          stock: { $first: "$orderDetails.product.stock" },
           count: { $sum: 1 },
         });
 
@@ -789,7 +789,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -802,20 +802,20 @@ module.exports = {
       let results = await Order.aggregate()
         .match(conditionFind)
         .lookup({
-          from: 'customers',
-          localField: 'customerId',
-          foreignField: '_id',
-          as: 'customer',
+          from: "customers",
+          localField: "customerId",
+          foreignField: "_id",
+          as: "customer",
         })
-        .unwind('customer')
+        .unwind("customer")
         .group({
-          _id: '$customer._id',
-          firstName: { $first: '$customer.firstName' },
-          lastName: { $first: '$customer.lastName' },
-          email: { $first: '$customer.email' },
-          phoneNumber: { $first: '$customer.phoneNumber' },
-          address: { $first: '$customer.address' },
-          birthday: { $first: '$customer.birthday' },
+          _id: "$customer._id",
+          firstName: { $first: "$customer.firstName" },
+          lastName: { $first: "$customer.lastName" },
+          email: { $first: "$customer.email" },
+          phoneNumber: { $first: "$customer.phoneNumber" },
+          address: { $first: "$customer.address" },
+          birthday: { $first: "$customer.birthday" },
         });
 
       let total = await Order.countDocuments();
@@ -827,7 +827,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -840,7 +840,7 @@ module.exports = {
       let results = await Order.aggregate()
         .match(conditionFind)
         .unwind({
-          path: '$orderDetails',
+          path: "$orderDetails",
           preserveNullAndEmptyArrays: true,
         })
         .addFields({
@@ -849,9 +849,9 @@ module.exports = {
               $divide: [
                 {
                   $multiply: [
-                    '$orderDetails.price',
-                    { $subtract: [100, '$orderDetails.discount'] },
-                    '$orderDetails.quantity',
+                    "$orderDetails.price",
+                    { $subtract: [100, "$orderDetails.discount"] },
+                    "$orderDetails.quantity",
                   ],
                 },
                 100,
@@ -859,10 +859,10 @@ module.exports = {
             },
           },
         })
-      .group({
-        _id: '$customerId',
-        total: { $sum: '$total' },
-      });
+        .group({
+          _id: "$customerId",
+          total: { $sum: "$total" },
+        });
 
       let total = await Order.countDocuments();
 
@@ -873,7 +873,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -886,7 +886,7 @@ module.exports = {
       let results = await Order.aggregate()
         .match(conditionFind)
         .unwind({
-          path: '$orderDetails',
+          path: "$orderDetails",
           preserveNullAndEmptyArrays: true,
         })
         .addFields({
@@ -895,9 +895,9 @@ module.exports = {
               $divide: [
                 {
                   $multiply: [
-                    '$orderDetails.price',
-                    { $subtract: [100, '$orderDetails.discount'] },
-                    '$orderDetails.quantity',
+                    "$orderDetails.price",
+                    { $subtract: [100, "$orderDetails.discount"] },
+                    "$orderDetails.quantity",
                   ],
                 },
                 100,
@@ -905,10 +905,10 @@ module.exports = {
             },
           },
         })
-      .group({
-        _id: null,
-        total: { $sum: '$total' },
-      });
+        .group({
+          _id: null,
+          total: { $sum: "$total" },
+        });
 
       let total = await Order.countDocuments();
 
@@ -919,7 +919,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -932,7 +932,7 @@ module.exports = {
       let results = await Order.aggregate()
         // .match(conditionFind)
         .unwind({
-          path: '$orderDetails',
+          path: "$orderDetails",
           preserveNullAndEmptyArrays: true,
         })
         .addFields({
@@ -941,9 +941,9 @@ module.exports = {
               $divide: [
                 {
                   $multiply: [
-                    '$orderDetails.price',
-                    { $subtract: [100, '$orderDetails.discount'] },
-                    '$orderDetails.quantity',
+                    "$orderDetails.price",
+                    { $subtract: [100, "$orderDetails.discount"] },
+                    "$orderDetails.quantity",
                   ],
                 },
                 100,
@@ -951,25 +951,25 @@ module.exports = {
             },
           },
         })
-      .group({
-        _id: '$employeeId',
-        total: { $sum: '$total' },
-      })
-      .lookup({
-        from: 'employees',
-        localField: '_id',
-        foreignField: '_id',
-        as: 'employee',
-      })
-      .unwind('employee')
-      .project({
-        totalPrice: '$total',
-        firstName: '$employee.firstName',
-        lastName: '$employee.lastName',
-        phoneNumber: '$employee.phoneNumber',
-        address: '$employee.address',
-        email : '$employee.email ',
-      })
+        .group({
+          _id: "$employeeId",
+          total: { $sum: "$total" },
+        })
+        .lookup({
+          from: "employees",
+          localField: "_id",
+          foreignField: "_id",
+          as: "employee",
+        })
+        .unwind("employee")
+        .project({
+          totalPrice: "$total",
+          firstName: "$employee.firstName",
+          lastName: "$employee.lastName",
+          phoneNumber: "$employee.phoneNumber",
+          address: "$employee.address",
+          email: "$employee.email ",
+        });
 
       let total = await Order.countDocuments();
 
@@ -980,7 +980,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -989,10 +989,10 @@ module.exports = {
     try {
       let results = await Product.aggregate()
         .lookup({
-          from: 'orders', 
-          localField: '_id',
-          foreignField: 'orderDetails.productId',
-          as: 'orders',
+          from: "orders",
+          localField: "_id",
+          foreignField: "orderDetails.productId",
+          as: "orders",
         })
         .match({
           orders: { $size: 0 },
@@ -1002,7 +1002,7 @@ module.exports = {
           name: 1,
           price: 1,
           stock: 1,
-        })
+        });
 
       let total = await Product.countDocuments();
 
@@ -1013,7 +1013,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -1022,64 +1022,64 @@ module.exports = {
     try {
       let { fromDate, toDate } = req.query;
       fromDate = new Date(fromDate);
-  
+
       const tmpToDate = new Date(toDate);
       toDate = new Date(tmpToDate.setDate(tmpToDate.getDate() + 1));
-  
+
       let results = await Product.aggregate()
-      .lookup({
-        from: 'orders',
-        localField: '_id',
-        foreignField: 'orderDetails.productId',
-        as: 'orders',
-      })
-      .unwind({
-        path: '$orders',
-        preserveNullAndEmptyArrays: true,
-      })
-      .match({
-        $or: [
-          {
-            $and: [
-              { orders: { $ne: null } },
-              {
-                $or: [
-                  { 'orders.createdDate': { $lte: fromDate } },
-                  { 'orders.createdDate': { $gte: toDate } },
-                ],
-              },
-            ],
-          },
-          {
-            orders: null,
-          },
-        ],
-      })
-      .lookup({
-        from: 'suppliers',
-        localField: 'supplierId',
-        foreignField: '_id',
-        as: 'suppliers',
-      })
-      .project({
-        _id: 0,
-        suppliers: 1,
-      })
-      .unwind('suppliers')
-      .project({
-        _id: '$suppliers._id',
-        name: '$suppliers.name',
-        email: '$suppliers.email',
-        phoneNumber: '$suppliers.phoneNumber',
-        address: '$suppliers.address',
-      })
-      .group({
-        _id: '$_id',
-        name: { $first: '$name' },
-        phoneNumber: { $first: '$phoneNumber' },
-        email: { $first: '$email' },
-        address: { $first: '$address' },
-      })
+        .lookup({
+          from: "orders",
+          localField: "_id",
+          foreignField: "orderDetails.productId",
+          as: "orders",
+        })
+        .unwind({
+          path: "$orders",
+          preserveNullAndEmptyArrays: true,
+        })
+        .match({
+          $or: [
+            {
+              $and: [
+                { orders: { $ne: null } },
+                {
+                  $or: [
+                    { "orders.createdDate": { $lte: fromDate } },
+                    { "orders.createdDate": { $gte: toDate } },
+                  ],
+                },
+              ],
+            },
+            {
+              orders: null,
+            },
+          ],
+        })
+        .lookup({
+          from: "suppliers",
+          localField: "supplierId",
+          foreignField: "_id",
+          as: "suppliers",
+        })
+        .project({
+          _id: 0,
+          suppliers: 1,
+        })
+        .unwind("suppliers")
+        .project({
+          _id: "$suppliers._id",
+          name: "$suppliers.name",
+          email: "$suppliers.email",
+          phoneNumber: "$suppliers.phoneNumber",
+          address: "$suppliers.address",
+        })
+        .group({
+          _id: "$_id",
+          name: { $first: "$name" },
+          phoneNumber: { $first: "$phoneNumber" },
+          email: { $first: "$email" },
+          address: { $first: "$address" },
+        });
 
       let total = await Product.countDocuments();
 
@@ -1090,7 +1090,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -1099,31 +1099,31 @@ module.exports = {
     try {
       let { fromDate, toDate } = req.query;
       fromDate = new Date(fromDate);
-  
+
       const tmpToDate = new Date(toDate);
       toDate = new Date(tmpToDate.setDate(tmpToDate.getDate() + 1));
-  
+
       let results = await Supplier.aggregate()
-      .lookup({
-        from: 'products',
-        localField: '_id',
-        foreignField: 'supplierId',
-        as: 'products',
-      })
-      .unwind({
-        path: '$products',
-        preserveNullAndEmptyArrays: true,
-      })
-      .lookup({
-        from: 'orders',
-        localField: 'products._id',
-        foreignField: 'orderDetails.productId',
-        as: 'orders',
-      })
-      .unwind({
-        path: '$orders',
-        preserveNullAndEmptyArrays: true,
-      })
+        .lookup({
+          from: "products",
+          localField: "_id",
+          foreignField: "supplierId",
+          as: "products",
+        })
+        .unwind({
+          path: "$products",
+          preserveNullAndEmptyArrays: true,
+        })
+        .lookup({
+          from: "orders",
+          localField: "products._id",
+          foreignField: "orderDetails.productId",
+          as: "orders",
+        })
+        .unwind({
+          path: "$orders",
+          preserveNullAndEmptyArrays: true,
+        });
       // .match({
       //   $or: [
       //     {
@@ -1177,7 +1177,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -1187,36 +1187,36 @@ module.exports = {
     try {
       let results = await Product.aggregate()
         .lookup({
-          from: 'orders', 
-          localField: '_id',
-          foreignField: 'orderDetails.productId',
-          as: 'orders',
+          from: "orders",
+          localField: "_id",
+          foreignField: "orderDetails.productId",
+          as: "orders",
         })
         .unwind({
-          path: '$orders',
+          path: "$orders",
           preserveNullAndEmptyArrays: true,
         })
         // thêm bộ lọc ngày tháng ở đây nếu có
         .group({
-          _id: '$supplierId',
-          ordersArr: { "$push": "$orders" },
+          _id: "$supplierId",
+          ordersArr: { $push: "$orders" },
         })
         .match({
           ordersArr: { $size: 0 },
         })
         .lookup({
-          from: 'suppliers',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'supplier',
+          from: "suppliers",
+          localField: "_id",
+          foreignField: "_id",
+          as: "supplier",
         })
-        .unwind('supplier')
+        .unwind("supplier")
         .project({
-          name: '$supplier.name',
-          email: '$supplier.email',
-          phoneNumber: '$supplier.phoneNumber',
-          address: '$supplier.address',
-        })
+          name: "$supplier.name",
+          email: "$supplier.email",
+          phoneNumber: "$supplier.phoneNumber",
+          address: "$supplier.address",
+        });
 
       let total = await Supplier.countDocuments();
 
@@ -1227,7 +1227,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -1238,59 +1238,63 @@ module.exports = {
       const conditionFind = getQueryDateTime(fromDate, toDate);
 
       let results = await Order.aggregate()
-      .match(conditionFind)
-      .unwind('orderDetails')
-      .addFields({
-        'orderDetails.originalPrice': {
-          $divide: [
-            {
+        .match(conditionFind)
+        .unwind("orderDetails")
+        .addFields({
+          "orderDetails.originalPrice": {
+            $divide: [
+              {
+                $multiply: [
+                  "$orderDetails.price",
+                  { $subtract: [100, "$orderDetails.discount"] },
+                ],
+              },
+              100,
+            ],
+          },
+        })
+        .group({
+          _id: "$employeeId",
+          // firstName: { $first: '$employees.firstName' },
+          // lastName: { $first: '$employees.lastName' },
+          // email: { $first: '$employees.email' },
+          // phoneNumber: { $first: '$employees.phoneNumber' },
+          // address: { $first: '$employees.address' },
+          // birthday: { $first: '$employees.birthday' },
+          totalSales: {
+            $sum: {
               $multiply: [
-                '$orderDetails.price',
-                { $subtract: [100, '$orderDetails.discount'] },
+                "$orderDetails.originalPrice",
+                "$orderDetails.quantity",
               ],
             },
-            100,
-          ],
-        },
-      })
-      .group({
-        _id: '$employeeId',
-        // firstName: { $first: '$employees.firstName' },
-        // lastName: { $first: '$employees.lastName' },
-        // email: { $first: '$employees.email' },
-        // phoneNumber: { $first: '$employees.phoneNumber' },
-        // address: { $first: '$employees.address' },
-        // birthday: { $first: '$employees.birthday' },
-        totalSales: {
-          $sum: { $multiply: ['$orderDetails.originalPrice', '$orderDetails.quantity'] },
-        },
-      })
-      .lookup({
-        from: 'employees',
-        localField: '_id',
-        foreignField: '_id',
-        as: 'employees',
-      })
-      .unwind('employees')
-      .project({
-        employeeId: '$_id',
-        firstName: '$employees.firstName',
-        lastName: '$employees.lastName',
-        phoneNumber: '$employees.phoneNumber',
-        address: '$employees.address',
-        email: '$employees.email',
-        totalSales: 1,
-      })
-      .sort({ totalSales: -1 })
-      .limit(3)
-      .skip(0);
+          },
+        })
+        .lookup({
+          from: "employees",
+          localField: "_id",
+          foreignField: "_id",
+          as: "employees",
+        })
+        .unwind("employees")
+        .project({
+          employeeId: "$_id",
+          firstName: "$employees.firstName",
+          lastName: "$employees.lastName",
+          phoneNumber: "$employees.phoneNumber",
+          address: "$employees.address",
+          email: "$employees.email",
+          totalSales: 1,
+        })
+        .sort({ totalSales: -1 })
+        .limit(3)
+        .skip(0);
 
       // .group({
       //   _id: '$totalSales',
       //   employees: { $push: '$$ROOT' },
       // })
       // // .sort({ _id: -1 })
-
 
       let total = await Order.countDocuments();
 
@@ -1301,7 +1305,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -1311,7 +1315,7 @@ module.exports = {
   //     let results = await Product.aggregate()
   //     .group({
   //       _id: '$discount',
-  //     })      
+  //     })
   //     .project({
   //       discount: '$_id',
   //     })
@@ -1332,7 +1336,7 @@ module.exports = {
 
   question29: async (req, res, next) => {
     try {
-      let results = await Product.distinct('discount')
+      let results = await Product.distinct("discount");
       // let results = await Order.distinct('orderDetails.discount')
 
       return res.send({
@@ -1341,7 +1345,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -1349,52 +1353,52 @@ module.exports = {
   question30: async (req, res, next) => {
     try {
       let results = await Category.aggregate()
-      .lookup({
-        from: 'products',
-        localField: '_id',
-        foreignField: 'categoryId',
-        as: 'products'
-      })
-      .unwind({
-        path: '$products',
-        preserveNullAndEmptyArrays: true,
-      })
-      .lookup({
-        from: 'orders',
-        localField: 'products._id',
-        foreignField: 'orderDetails.productId',
-        as: 'orders'
-      })
-      .unwind({
-        path: '$orders',
-        preserveNullAndEmptyArrays: true,
-      })
-      .unwind({
-        path: '$orders.orderDetails',
-        preserveNullAndEmptyArrays: true,
-      })
-      .addFields({
-        originalPrice: {
-          $divide: [
-            {
-              $multiply: [
-                '$orders.orderDetails.price',
-                { $subtract: [100, '$orders.orderDetails.discount'] },
-              ],
-            },
-            100,
-          ],
-        },
-        amount: '$orders.orderDetails.quantity',
-      })
-      .group({
-        _id: '$_id',
-        name: { $first: '$name' },
-        description: { $first: '$description' },
-        total: {
-          $sum: { $multiply: ['$originalPrice', '$amount'] },
-        },
-      })
+        .lookup({
+          from: "products",
+          localField: "_id",
+          foreignField: "categoryId",
+          as: "products",
+        })
+        .unwind({
+          path: "$products",
+          preserveNullAndEmptyArrays: true,
+        })
+        .lookup({
+          from: "orders",
+          localField: "products._id",
+          foreignField: "orderDetails.productId",
+          as: "orders",
+        })
+        .unwind({
+          path: "$orders",
+          preserveNullAndEmptyArrays: true,
+        })
+        .unwind({
+          path: "$orders.orderDetails",
+          preserveNullAndEmptyArrays: true,
+        })
+        .addFields({
+          originalPrice: {
+            $divide: [
+              {
+                $multiply: [
+                  "$orders.orderDetails.price",
+                  { $subtract: [100, "$orders.orderDetails.discount"] },
+                ],
+              },
+              100,
+            ],
+          },
+          amount: "$orders.orderDetails.quantity",
+        })
+        .group({
+          _id: "$_id",
+          name: { $first: "$name" },
+          description: { $first: "$description" },
+          total: {
+            $sum: { $multiply: ["$originalPrice", "$amount"] },
+          },
+        });
 
       let total = await Category.countDocuments();
 
@@ -1405,7 +1409,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -1416,45 +1420,45 @@ module.exports = {
       const conditionFind = getQueryDateTime(fromDate, toDate);
 
       let results = await Order.aggregate()
-      .match(conditionFind)
-      .unwind('orderDetails')
-      .addFields({
-        originalPrice: {
-          $divide: [
-            {
-              $multiply: [
-                '$orderDetails.price',
-                { $subtract: [100, '$orderDetails.discount'] },
-              ],
-            },
-            100,
-          ],
-        },
-      })
-      .group({
-        _id: '$_id',
-        createdDate: { $first: '$createdDate' },
-        shippedDate: { $first: '$shippedDate' },
-        status: { $first: '$status' },
-        total: {
-          $sum: { $multiply: ['$originalPrice', '$orderDetails.quantity'] },
-        },
-      })
-      .group({
-        _id: '$total',
-        orders: { $push: '$$ROOT' },
-      })
-      .sort({ _id: 1})
-      .skip(0)
-      .limit(1)
-      .unwind('orders')
-      .project({
-        _id: '$orders._id',
-        createdDate: '$orders.createdDate',
-        shippedDate: '$orders.shippedDate',
-        status: '$orders.status',
-        total: '$orders.total',
-      })
+        .match(conditionFind)
+        .unwind("orderDetails")
+        .addFields({
+          originalPrice: {
+            $divide: [
+              {
+                $multiply: [
+                  "$orderDetails.price",
+                  { $subtract: [100, "$orderDetails.discount"] },
+                ],
+              },
+              100,
+            ],
+          },
+        })
+        .group({
+          _id: "$_id",
+          createdDate: { $first: "$createdDate" },
+          shippedDate: { $first: "$shippedDate" },
+          status: { $first: "$status" },
+          total: {
+            $sum: { $multiply: ["$originalPrice", "$orderDetails.quantity"] },
+          },
+        })
+        .group({
+          _id: "$total",
+          orders: { $push: "$$ROOT" },
+        })
+        .sort({ _id: 1 })
+        .skip(0)
+        .limit(1)
+        .unwind("orders")
+        .project({
+          _id: "$orders._id",
+          createdDate: "$orders.createdDate",
+          shippedDate: "$orders.shippedDate",
+          status: "$orders.status",
+          total: "$orders.total",
+        });
 
       let total = await Order.countDocuments();
 
@@ -1465,7 +1469,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -1476,40 +1480,40 @@ module.exports = {
       const conditionFind = getQueryDateTime(fromDate, toDate);
 
       let results = await Order.aggregate()
-      .match(conditionFind)
-      .unwind('orderDetails')
-      .addFields({
-        originalPrice: {
-          $divide: [
-            {
-              $multiply: [
-                '$orderDetails.price',
-                { $subtract: [100, '$orderDetails.discount'] },
-              ],
-            },
-            100,
-          ],
-        },
-      })
-      .group({
-        _id: '$_id',
-        createdDate: { $first: '$createdDate' },
-        shippedDate: { $first: '$shippedDate' },
-        status: { $first: '$status' },
-        shippingAddress: { $first: '$shippingAddress' },
-        description: { $first: '$description' },
-        total: {
-          $sum: { $multiply: ['$originalPrice', '$orderDetails.quantity'] },
-        },
-      })
-      .group({
-        _id: null,
-        avg: { $avg: '$total' },
-      })
-      .project({
-        _id: 0,
-        avg: 1,
-      })
+        .match(conditionFind)
+        .unwind("orderDetails")
+        .addFields({
+          originalPrice: {
+            $divide: [
+              {
+                $multiply: [
+                  "$orderDetails.price",
+                  { $subtract: [100, "$orderDetails.discount"] },
+                ],
+              },
+              100,
+            ],
+          },
+        })
+        .group({
+          _id: "$_id",
+          createdDate: { $first: "$createdDate" },
+          shippedDate: { $first: "$shippedDate" },
+          status: { $first: "$status" },
+          shippingAddress: { $first: "$shippingAddress" },
+          description: { $first: "$description" },
+          total: {
+            $sum: { $multiply: ["$originalPrice", "$orderDetails.quantity"] },
+          },
+        })
+        .group({
+          _id: null,
+          avg: { $avg: "$total" },
+        })
+        .project({
+          _id: 0,
+          avg: 1,
+        });
 
       let total = await Order.countDocuments();
 
@@ -1520,7 +1524,7 @@ module.exports = {
         payload: results,
       });
     } catch (err) {
-      console.log('««««« err »»»»»', err);
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
@@ -1562,13 +1566,13 @@ module.exports = {
             $divide: [
               {
                 $multiply: [
-                  '$orderDetails.product.price',
-                  { $subtract: [100, '$orderDetails.product.discount'] },
+                  "$orderDetails.product.price",
+                  { $subtract: [100, "$orderDetails.product.discount"] },
                 ],
               },
               100,
             ],
-          }
+          },
         })
         .group({
           _id: "$orderDetails.productId",
@@ -1601,22 +1605,19 @@ module.exports = {
         discount: { $lte: 100 },
       };
       let results = await Product.aggregate()
-      .addFields({
-        discountedPrice: {
-          $divide: [
-            {
-              $multiply: [
-                '$price',
-                { $subtract: [100, '$discount'] },
-              ],
-            },
-            100,
-          ],
-        }
-      })
+        .addFields({
+          discountedPrice: {
+            $divide: [
+              {
+                $multiply: ["$price", { $subtract: [100, "$discount"] }],
+              },
+              100,
+            ],
+          },
+        })
         .match(conditionFind)
         .skip(parseInt(skip))
-        .limit(parseInt(limit))
+        .limit(parseInt(limit));
       let total = await Product.countDocuments();
 
       return res.send({
@@ -1636,8 +1637,9 @@ module.exports = {
       const conditionFind = {
         name: { $regex: new RegExp(`${name}`), $options: "i" },
       };
-      let results = await       
-      Product.find(conditionFind).populate('category').populate('supplier');
+      let results = await Product.find(conditionFind)
+        .populate("category")
+        .populate("supplier");
       return res.send({ code: 200, payload: results });
     } catch (err) {
       console.log("««««« err »»»»»", err);
@@ -1648,117 +1650,247 @@ module.exports = {
   productSimilar: async (req, res, next) => {
     try {
       const { name } = req.query;
-  
+
       // Tách các từ trong tên sản phẩm đang xem
       const keywords = name.split(" ");
-  
+
       // Tạo biểu thức chính quy để tìm kiếm các từ giống nhau
       const regex = new RegExp(keywords.join("|"), "i");
-  
+
       const conditionFind = {
-        name: { $regex: regex }
+        name: { $regex: regex },
       };
-  
+
       let results = await Product.find(conditionFind)
         .populate("category")
         .populate("supplier");
 
-  
-      return res.send({ code: 200, totalResult: results.length, payload: results });
+      return res.send({
+        code: 200,
+        totalResult: results.length,
+        payload: results,
+      });
     } catch (err) {
       console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },
-  
+
   filterCategory: async (req, res, next) => {
-  try {
-    const { categoryIds, minPrice, maxPrice, sortBy } = req.query;
+    try {
+      const { categoryIds, minPrice, maxPrice, sortBy } = req.query;
 
-    let categoryObjectIds = categoryIds.split(",").map((categoryId) => new ObjectId(categoryId));
+      let categoryObjectIds = categoryIds
+        .split(",")
+        .map((categoryId) => new ObjectId(categoryId));
 
-    let query = { categoryId: { $in: categoryObjectIds } };
+      let query = { categoryId: { $in: categoryObjectIds } };
 
-    if (minPrice && maxPrice) {
-      query.$expr = {
-        $and: [
+      if (minPrice && maxPrice) {
+        query.$expr = {
+          $and: [
+            {
+              $gte: [
+                { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
+                { $multiply: [Number(minPrice), 100] },
+              ],
+            },
+            {
+              $lte: [
+                { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
+                { $multiply: [Number(maxPrice), 100] },
+              ],
+            },
+          ],
+        };
+      } else if (minPrice) {
+        query.$expr = {
+          $gte: [
+            { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
+            { $multiply: [Number(minPrice), 100] },
+          ],
+        };
+      } else if (maxPrice) {
+        query.$expr = {
+          $lte: [
+            { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
+            { $multiply: [Number(maxPrice), 100] },
+          ],
+        };
+      }
+
+      let results;
+      if (sortBy === "discountLowToHigh") {
+        results = await Product.find(query).sort({ discount: 1 });
+      } else if (sortBy === "discountHighToLow") {
+        results = await Product.find(query).sort({ discount: -1 });
+      } else if (sortBy === "bestSelling") {
+        // Sử dụng câu truy vấn tìm sản phẩm bán chạy nhất như một subquery
+        const bestSellingProductIds = await Order.aggregate([
+          { $match: { status: "COMPLETED" } },
+          { $unwind: "$orderDetails" },
           {
-            $gte: [
-              { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
-              { $multiply: [Number(minPrice), 100] }
-            ]
+            $group: {
+              _id: "$orderDetails.productId",
+              totalQuantity: { $sum: "$orderDetails.quantity" },
+            },
           },
-          {
-            $lte: [
-              { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
-              { $multiply: [Number(maxPrice), 100] }
-            ]
-          }
-        ]
+          { $sort: { totalQuantity: -1 } },
+          { $limit: 10 }, // Lấy 10 sản phẩm bán chạy nhất
+        ]).exec(); // Sử dụng .exec() để thực hiện truy vấn và trả về kết quả dưới dạng mảng
+
+        const bestSellingIds = bestSellingProductIds.map(
+          (product) => product._id
+        ); // Sử dụng .map() trên mảng
+
+        query._id = { $in: bestSellingIds };
+
+        results = await Product.find(query);
+      } else if (sortBy === "priceLowToHigh") {
+        results = await Product.find(query).sort({ price: 1 });
+      } else if (sortBy === "priceHighToLow") {
+        results = await Product.find(query).sort({ price: -1 });
+      } else if (sortBy === "newest") {
+        results = await Product.find(query).sort({ createdAt: -1 });
+      } else {
+        results = await Product.find(query);
+      }
+
+      let total = results.length;
+
+      return res.send({
+        code: 200,
+        total,
+        totalResult: results.length,
+        payload: results,
+      });
+    } catch (err) {
+      console.log("««««« err »»»»»", err);
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+  //Tính ra tổng nhân viên
+  totalstaff: async (req, res, next) => {
+    try {
+      // Điều kiện để tính tổng số nhân viên
+      // Bạn muốn tính tổng số nhân viên đang làm việc (isActive = true).
+      const conditionFind = {
+        isActive: true,
       };
-    } else if (minPrice) { 
-      query.$expr = {
-        $gte: [
-          { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
-          { $multiply: [Number(minPrice), 100] }
-        ]
+
+      // Thực hiện truy vấn để lấy những nhân viên thỏa điều kiện
+      let results = await Employee.find(conditionFind).lean();
+
+      // Tính tổng số nhân viên trong cơ sở dữ liệu
+      let total = await Employee.countDocuments();
+
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        total,
+        totalResult: results.length,
+        payload: results,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
+  //Tính ra tổng sản phẩm
+  grossproduct: async (req, res, next) => {
+    try {
+      // Điều kiện để lấy tất cả sản phẩm (có thể không cần điều kiện)
+      const conditionFind = {};
+
+      // Thực hiện truy vấn để lấy những sản phẩm thỏa điều kiện
+      let results = await Product.find(conditionFind).lean();
+
+      // Tính tổng số sản phẩm trong cơ sở dữ liệu
+      let total = await Product.countDocuments();
+
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        total,
+        totalResult: results.length,
+        payload: results,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
+  //Tính ra tổng đơn hàng
+  totalorder: async (req, res, next) => {
+    try {
+      // Điều kiện để lấy tất cả sản phẩm (có thể không cần điều kiện)
+      const conditionFind = {};
+
+      // Thực hiện truy vấn để lấy những sản phẩm thỏa điều kiện
+      let results = await Order.find(conditionFind).lean();
+
+      // Tính tổng số sản phẩm trong cơ sở dữ liệu
+      let total = await Order.countDocuments();
+
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        total,
+        totalResult: results.length,
+        payload: results,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
+  //Tính tổng thu nhập
+
+  totalIncome: async (req, res, next) => {
+    try {
+      const conditionFind = {
+        status: "COMPLETED", //trạng thái đơn hàng đã hoàn thành
       };
-    } else if (maxPrice) {
-      query.$expr = {
-        $lte: [
-          { $multiply: ["$price", { $subtract: [100, "$discount"] }] },
-          { $multiply: [Number(maxPrice), 100] }
-        ]
-      };
+
+      const totalIncomeResult = await Order.aggregate([
+        { $match: conditionFind }, // Lọc các đơn hàng theo điều kiện conditionFind
+        { $unwind: "$orderDetails" }, // Tách các phần tử trong mảng orderDetails thành từng document riêng biệt
+        {
+          $group: {
+            _id: null,
+            totalIncome: {
+              $sum: {
+                $multiply: [
+                  { $multiply: ["$orderDetails.price", "$orderDetails.quantity"] },
+                  { $subtract: [1, { $divide: ["$discount", 100] }] }, // Áp dụng giảm giá theo đơn vị %
+                ],
+              },
+            },
+          },
+        }, // Nhóm và tính tổng thu nhập sau khi áp dụng giảm giá từ tích giữa giá và số lượng trong mảng orderDetails
+        { $project: { _id: 0, totalIncome: 1 } }, // Chỉ trả về trường totalIncome
+      ]);
+      
+      // Kiểm tra trường totalIncome trong kết quả truy vấn
+      if (totalIncomeResult[0] && totalIncomeResult[0].totalIncome !== undefined) {
+        // Nếu tồn tại, lấy giá trị tổng thu nhập từ kết quả truy vấn
+        const totalIncome = parseFloat(totalIncomeResult[0].totalIncome);
+        // Trả về kết quả dưới dạng JSON với số thực là totalIncome
+        return res.send({
+          code: 200,
+          totalIncome: totalIncome,
+        });
+      } else {
+        // Nếu không tồn tại, gán giá trị mặc định cho totalIncome
+        const defaultTotalIncome = 0;
+        // Trả về kết quả dưới dạng JSON với giá trị mặc định cho totalIncome
+        return res.send({
+          code: 200,
+          totalIncome: defaultTotalIncome,
+        });
+      }      
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
     }
-
-    let results;
-    if (sortBy === "discountLowToHigh") {
-      results = await Product.find(query).sort({ discount: 1 });
-    } else if (sortBy === "discountHighToLow") {
-      results = await Product.find(query).sort({ discount: -1 });
-    } else if (sortBy === "bestSelling") {
-      // Sử dụng câu truy vấn tìm sản phẩm bán chạy nhất như một subquery
-      const bestSellingProductIds = await Order.aggregate([
-        { $match: { status: "COMPLETED" } },
-        { $unwind: "$orderDetails" },
-        { $group: { _id: "$orderDetails.productId", totalQuantity: { $sum: "$orderDetails.quantity" } } },
-        { $sort: { totalQuantity: -1 } },
-        { $limit: 10 } // Lấy 10 sản phẩm bán chạy nhất
-      ]).exec(); // Sử dụng .exec() để thực hiện truy vấn và trả về kết quả dưới dạng mảng
-
-      const bestSellingIds = bestSellingProductIds.map((product) => product._id); // Sử dụng .map() trên mảng
-    
-      query._id = { $in: bestSellingIds };
-    
-      results = await Product.find(query);
-    }
-      else if (sortBy === "priceLowToHigh") {
-      results = await Product.find(query).sort({ price: 1 });
-    } else if (sortBy === "priceHighToLow") {
-      results = await Product.find(query).sort({ price: -1 });
-    }
-    else if (sortBy === "newest") {
-      results = await Product.find(query).sort({ createdAt: -1 });
-    } 
-     else {
-      results = await Product.find(query);
-    }
-
-    let total = results.length;
-
-    return res.send({
-      code: 200,
-      total,
-      totalResult: results.length,
-      payload: results,
-    });
-  } catch (err) {
-    console.log("««««« err »»»»»", err);
-    return res.status(500).json({ code: 500, error: err });
-  }
-},
-
-  
-  
+  },
 };

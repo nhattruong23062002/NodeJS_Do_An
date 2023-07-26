@@ -8,6 +8,9 @@ module.exports = {
        // Thêm header Cache-Control vào phản hồi
        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
 
+      // Thêm header Cache-Control vào phản hồi
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+
       return res.send({ code: 200, payload: results });
     } catch (err) {
       return res.status(500).json({ code: 500, error: err });
