@@ -19,6 +19,7 @@ const {
   create,
   remove,
   update,
+  forgotPassword,
 } = require('./controller');
 const allowRoles = require('../../../middle-wares/checkRole');
 
@@ -36,7 +37,8 @@ router.route('/login') // Đối tượng cần kiểm tra là tài khoản và 
     passport.authenticate('localAdmin', { session: false }),
     login,
     )
-
+router.route('/forgot-password')
+  .post(forgotPassword)
 router.route('/refresh-token')
   .post(checkRefreshToken)
 

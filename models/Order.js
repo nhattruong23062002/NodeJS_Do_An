@@ -12,7 +12,6 @@ const orderDetailSchema = new Schema(
     productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
     quantity: { type: Number, require: true, min: 0 },
     price: { type: Number, required: true, min: 0, default: 0 },
-    discount: { type: Number, default: 0 },
   },
   {
     versionKey: false,
@@ -77,24 +76,37 @@ const orderSchema = new Schema(
     status: {
       type: String,
       required: true,
-      enum: ['WAITING', 'COMPLETED', 'CANCELED'],
+      enum: ['WAITING', 'COMPLETED', 'CANCELED', 'DELIVERING'],
       default: 'WAITING',
       // validate: {
       //   validator: (value) => {
       //     if (['WAITING', 'COMPLETED', 'CANCELED'].includes(value)) {
-      //       return true;
+      //       return true;conditionFind
       //     }
       //     return false;
       //   },
       //   message: `Status: {VALUE} is invalid!`,
       // },
     },
-
+    description: {
+      type: String,
+    },
+    shippingAddress: {
+      type: String,
+      require: [true, "Vui lòng nhập địa chỉ"],
+      maxLength: [500, "Địa chỉ không được vượt quá 500 ký tự"],
+    },
+    discount: { type: Number, default: 0 },
     customerId: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
     employeeId: { type: Schema.Types.ObjectId, ref: 'Employee' },
 
     // Array
     orderDetails: [orderDetailSchema],
+    isDelete: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
   },
   {
     versionKey: false,

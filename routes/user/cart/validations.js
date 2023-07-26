@@ -51,7 +51,7 @@ module.exports = {
         .test('validationCustomerID', 'ID sai định dạng', (value) => {
           return ObjectId.isValid(value);
         }),
-
+        
       productId: yup
         .string()
         .required()

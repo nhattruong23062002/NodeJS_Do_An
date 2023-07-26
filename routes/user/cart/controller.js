@@ -6,7 +6,7 @@ module.exports = {
     try {
       const { id } = req.params;
 
-      let found = await Cart.findOne({ customerId: id});
+      let found = await Cart.findOne({ customerId: id}).populate("products.productId");
 
       if (found) {
         return res.send({ code: 200, payload: found });
@@ -104,10 +104,11 @@ module.exports = {
   create: async function (req, res, next) {
     try {
       const { customerId, productId, quantity } = req.body;
+
       // const { _id: customerId } = req.user;
 
       // const getCustomer = Customer.findById(customerId);
-      const getProduct = Product.findById(productId);
+      const getProduct =await Product.findById(productId);
 
       const [
         // customer,
@@ -206,9 +207,11 @@ module.exports = {
 
   remove: async function (req, res, next) {
     try {
-      const { productId } = req.body;
+      const { customerId,productId } = req.body;
 
       let cart = await Cart.findOne({ customerId });
+
+      console.log('««««« cart »»»»»', cart);
 
       if (!cart) {
         return res.status(404).json({
@@ -219,11 +222,15 @@ module.exports = {
 
       if (cart.products.length === 1 && cart.products[0].productId === productId) {
         await Cart.deleteOne({ _id: cart._id });
-      } else {
-        await Cart.findOneAndUpdate(cart._id, {
+      } /* else {
+        await Cart.findOneAndUpdate({ _id: cart._id }, {
           customerId,
-          products: cart.product.filter((item) => item.productId !== productId),
-        });
+          products: cart.products.filter((item) => item.productId !==  new ObjectId(productId)),
+        }); */
+        else {
+          await cart.updateOne({
+            $pull: { products: { productId: productId } }
+          });
       }
 
       return res.send({
@@ -231,6 +238,7 @@ module.exports = {
         message: 'Xóa thành công',
       });
     } catch (err) {
+      console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
   },

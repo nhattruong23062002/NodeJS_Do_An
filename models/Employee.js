@@ -64,9 +64,13 @@ const employeeSchema = new Schema(
       default: true,
       required: true,
     },
-    roles: {
-      type: Array,
-      default: [],
+    role: {
+      type: Number,
+      default: 0,
+    },
+    question: {
+      type: String,
+      required: true,
     }
   },
   {

@@ -1,5 +1,5 @@
-const yup = require('yup');
-const ObjectId = require('mongodb').ObjectId;
+const yup = require("yup");
+const ObjectId = require("mongodb").ObjectId;
 
 module.exports = {
   // getSchema: yup.object({
@@ -26,7 +26,7 @@ module.exports = {
 
   getDetailSchema: yup.object({
     params: yup.object({
-      id: yup.string().test('validationID', 'ID sai định dạng', (value) => {
+      id: yup.string().test("validationID", "ID sai định dạng", (value) => {
         return ObjectId.isValid(value);
       }),
     }),
@@ -38,7 +38,7 @@ module.exports = {
 
       shippedDate: yup
         .date()
-        .test('check date', '${path} ngày tháng không hợp lệ', (value) => {
+        .test("check date", "${path} ngày tháng không hợp lệ", (value) => {
           if (!value) return true;
 
           if (value && this.createdDate && value < this.createdDate) {
@@ -52,17 +52,21 @@ module.exports = {
           return true;
         }),
 
-      paymentType: yup.string()
+      paymentType: yup
+        .string()
         .required()
-        .oneOf(['CASH', 'CREDIT CARD'], 'Phương thức thanh toán không hợp lệ'),
+        .oneOf(["CASH", "CREDIT CARD"], "Phương thức thanh toán không hợp lệ"),
 
-      status: yup.string()
+      status: yup
+        .string()
         .required()
-        .oneOf(['WAITING', 'COMPLETED', 'CANCELED'], 'Trạng thái không hợp lệ'),
+        .oneOf(["WAITING", "COMPLETED", "CANCELED", "DELIVERING"], "Trạng thái không hợp lệ"),
 
+      shippingAddress: yup.string().required(),
+      discount: yup.number().min(0),
       customerId: yup
         .string()
-        .test('validationCustomerID', 'ID sai định dạng', (value) => {
+        .test("validationCustomerID", "ID sai định dạng", (value) => {
           return ObjectId.isValid(value);
         }),
 
@@ -78,7 +82,7 @@ module.exports = {
         yup.object().shape({
           productId: yup
             .string()
-            .test('validationProductID', 'ID sai định dạng', (value) => {
+            .test("validationProductID", "ID sai định dạng", (value) => {
               return ObjectId.isValid(value);
             }),
 
@@ -86,8 +90,7 @@ module.exports = {
 
           price: yup.number().required().min(0),
 
-          discount: yup.number().required().min(0),
-        }),
+        })
       ),
     }),
   }),
