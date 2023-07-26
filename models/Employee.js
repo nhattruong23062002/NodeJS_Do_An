@@ -74,6 +74,7 @@ const employeeSchema = new Schema(
     }
   },
   {
+    timestamps: true, // Sẽ tự động tạo trường createdAt và updatedAt
     versionKey: false,
   },
 );

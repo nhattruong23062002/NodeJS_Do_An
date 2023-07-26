@@ -1844,7 +1844,7 @@ module.exports = {
     }
   },
 
-  //Tính tổng thu nhập
+  //Tính tổng thu nhập dự trên price, discount, quantity, status
 
   totalIncome: async (req, res, next) => {
     try {
@@ -1858,6 +1858,8 @@ module.exports = {
         {
           $group: {
             _id: null,
+            //Công thức totalIncome = SUM(price * quantity * (1 - discount/100))
+            //1 - discount/100: giá trị sau khi áp dụng giảm giá
             totalIncome: {
               $sum: {
                 $multiply: [
@@ -1877,7 +1879,8 @@ module.exports = {
         const totalIncome = parseFloat(totalIncomeResult[0].totalIncome);
         // Trả về kết quả dưới dạng JSON với số thực là totalIncome
         return res.send({
-          code: 200,
+          code: 200, 
+          message: "Tính tổng thu nhập thành công",
           totalIncome: totalIncome,
         });
       } else {
@@ -1893,4 +1896,93 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+
+  //Tính tổng đơn hàng bị hủy
+  canceledorder: async (req, res, next) => {
+    try {
+      const conditionFind = {
+        status: "CANCELED", //trạng thái đơn hàng bị hủy
+      };
+
+      // Thực hiện truy vấn để lấy những sản phẩm thỏa điều kiện
+      let results = await Order.find(conditionFind).lean();
+
+      // Tính tổng số sản phẩm trong cơ sở dữ liệu
+      let total = await Order.countDocuments();
+
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        total,
+        totalResult: results.length,
+        payload: results,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
+   //Tính tổng sản phẩm hết hàng
+   outstock: async (req, res, next) => {
+    try {
+      const conditionFind = {
+        stock: 0, // số lượng trong kho bằng 0
+      };
+
+      //cách 1 
+      // // Thực hiện truy vấn để lấy những sản phẩm thỏa điều kiện
+      // let results = await Order.find(conditionFind).lean();
+
+      // // Tính tổng số sản phẩm trong cơ sở dữ liệu
+      // let total = await Order.countDocuments();
+
+      //Cách 2
+      // Sử dụng Aggregation Framework để tính tổng số sản phẩm hết hàng
+      const totalOutstock = await Product.aggregate([
+        { $match: conditionFind }, // Lọc các sản phẩm thỏa điều kiện
+        { $count: "totalOutstock" }, // Tính tổng số sản phẩm hết hàng
+      ]);
+  
+      // Kiểm tra nếu mảng totalOutstock rỗng, trả về 0
+      const totalOutstockCount = totalOutstock.length > 0 ? totalOutstock[0].totalOutstock : 0;
+  
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        totalOutstock: totalOutstockCount,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
+  //Tính tổng số nhân viên mới
+  countNewEmployees: async (req, res, next) => {
+    try {
+      // Để tính tổng số nhân viên mới, sử dụng điều kiện là 'isActive: true' (nhân viên đang hoạt động)
+      // và 'createdAt' trong khoảng thời gian từ bắt đầu ngày hiện tại đến cuối ngày hiện tại
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0); // Đưa về thời điểm bắt đầu của ngày hiện tại
+      const nextDay = new Date(today);
+      nextDay.setUTCDate(nextDay.getUTCDate() + 1); // Lấy ngày tiếp theo để đến cuối ngày hiện tại
+  
+      const conditionFind = {
+        isActive: true,
+        createdAt: {
+          $gte: today, // Ngày tạo phải lớn hơn hoặc bằng ngày bắt đầu
+          $lt: nextDay, // Ngày tạo phải nhỏ hơn ngày tiếp theo (đến cuối ngày)
+        },
+      };
+      const totalNewEmployees = await Employee.countDocuments(conditionFind);
+      return res.send({
+        code: 200,
+        message: "Tổng số nhân viên mới",
+        totalNewEmployees: totalNewEmployees,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+  
+  
 };
