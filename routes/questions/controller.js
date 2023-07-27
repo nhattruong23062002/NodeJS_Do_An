@@ -1863,7 +1863,12 @@ module.exports = {
             totalIncome: {
               $sum: {
                 $multiply: [
-                  { $multiply: ["$orderDetails.price", "$orderDetails.quantity"] },
+                  {
+                    $multiply: [
+                      "$orderDetails.price",
+                      "$orderDetails.quantity",
+                    ],
+                  },
                   { $subtract: [1, { $divide: ["$discount", 100] }] }, // Áp dụng giảm giá theo đơn vị %
                 ],
               },
@@ -1872,14 +1877,17 @@ module.exports = {
         }, // Nhóm và tính tổng thu nhập sau khi áp dụng giảm giá từ tích giữa giá và số lượng trong mảng orderDetails
         { $project: { _id: 0, totalIncome: 1 } }, // Chỉ trả về trường totalIncome
       ]);
-      
+
       // Kiểm tra trường totalIncome trong kết quả truy vấn
-      if (totalIncomeResult[0] && totalIncomeResult[0].totalIncome !== undefined) {
+      if (
+        totalIncomeResult[0] &&
+        totalIncomeResult[0].totalIncome !== undefined
+      ) {
         // Nếu tồn tại, lấy giá trị tổng thu nhập từ kết quả truy vấn
         const totalIncome = parseFloat(totalIncomeResult[0].totalIncome);
         // Trả về kết quả dưới dạng JSON với số thực là totalIncome
         return res.send({
-          code: 200, 
+          code: 200,
           message: "Tính tổng thu nhập thành công",
           totalIncome: totalIncome,
         });
@@ -1891,7 +1899,7 @@ module.exports = {
           code: 200,
           totalIncome: defaultTotalIncome,
         });
-      }      
+      }
     } catch (err) {
       return res.status(500).json({ code: 500, error: err });
     }
@@ -1922,14 +1930,14 @@ module.exports = {
     }
   },
 
-   //Tính tổng sản phẩm hết hàng
-   outstock: async (req, res, next) => {
+  //Tính tổng sản phẩm hết hàng
+  outstock: async (req, res, next) => {
     try {
       const conditionFind = {
         stock: 0, // số lượng trong kho bằng 0
       };
 
-      //cách 1 
+      //cách 1
       // // Thực hiện truy vấn để lấy những sản phẩm thỏa điều kiện
       // let results = await Order.find(conditionFind).lean();
 
@@ -1942,10 +1950,11 @@ module.exports = {
         { $match: conditionFind }, // Lọc các sản phẩm thỏa điều kiện
         { $count: "totalOutstock" }, // Tính tổng số sản phẩm hết hàng
       ]);
-  
+
       // Kiểm tra nếu mảng totalOutstock rỗng, trả về 0
-      const totalOutstockCount = totalOutstock.length > 0 ? totalOutstock[0].totalOutstock : 0;
-  
+      const totalOutstockCount =
+        totalOutstock.length > 0 ? totalOutstock[0].totalOutstock : 0;
+
       // Trả về kết quả dưới dạng JSON
       return res.send({
         code: 200,
@@ -1957,32 +1966,139 @@ module.exports = {
   },
 
   //Tính tổng số nhân viên mới
+  // countNewEmployees: async (req, res, next) => {
+  //   try {
+  //     // Để tính tổng số nhân viên mới, sử dụng điều kiện là 'isActive: true' (nhân viên đang hoạt động)
+  //     // và 'createdAt' trong khoảng thời gian từ bắt đầu ngày hiện tại đến cuối ngày hiện tại
+  //     const today = new Date();
+  //     today.setUTCHours(0, 0, 0, 0); // Đưa về thời điểm bắt đầu của ngày hiện tại
+  //     const nextDay = new Date(today);
+  //     nextDay.setUTCDate(nextDay.getUTCDate() + 1); // Lấy ngày tiếp theo để đến cuối ngày hiện tại
+
+  //     const conditionFind = {
+  //       isActive: true,
+  //       createdAt: {
+  //         $gte: today, // Ngày tạo phải lớn hơn hoặc bằng ngày bắt đầu
+  //         $lt: nextDay, // Ngày tạo phải nhỏ hơn ngày tiếp theo (đến cuối ngày)
+  //       },
+  //     };
+  //     const totalNewEmployees = await Employee.countDocuments(conditionFind);
+  //     return res.send({
+  //       code: 200,
+  //       message: "Tổng số nhân viên mới",
+  //       totalNewEmployees: totalNewEmployees,
+  //     });
+  //   } catch (err) {
+  //     return res.status(500).json({ code: 500, error: err });
+  //   }
+  // },
+
+  // Tính tổng số nhân viên mới trong 1 tuần gần nhất
   countNewEmployees: async (req, res, next) => {
     try {
       // Để tính tổng số nhân viên mới, sử dụng điều kiện là 'isActive: true' (nhân viên đang hoạt động)
-      // và 'createdAt' trong khoảng thời gian từ bắt đầu ngày hiện tại đến cuối ngày hiện tại
+      // và 'createdAt' trong khoảng thời gian từ bắt đầu ngày tuần trước đến cuối ngày hiện tại
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0); // Đưa về thời điểm bắt đầu của ngày hiện tại
-      const nextDay = new Date(today);
-      nextDay.setUTCDate(nextDay.getUTCDate() + 1); // Lấy ngày tiếp theo để đến cuối ngày hiện tại
-  
+      const oneWeekAgo = new Date(today);
+      oneWeekAgo.setUTCDate(oneWeekAgo.getUTCDate() - 7); // Lấy ngày bắt đầu của tuần trước
+
       const conditionFind = {
         isActive: true,
         createdAt: {
-          $gte: today, // Ngày tạo phải lớn hơn hoặc bằng ngày bắt đầu
-          $lt: nextDay, // Ngày tạo phải nhỏ hơn ngày tiếp theo (đến cuối ngày)
+          $gte: oneWeekAgo, // Ngày tạo phải lớn hơn hoặc bằng ngày bắt đầu của tuần trước
+          $lt: today, // Ngày tạo phải nhỏ hơn ngày hiện tại (đến cuối ngày)
         },
       };
+
       const totalNewEmployees = await Employee.countDocuments(conditionFind);
       return res.send({
         code: 200,
-        message: "Tổng số nhân viên mới",
+        message: "Tổng số nhân viên mới trong 1 tuần gần nhất",
         totalNewEmployees: totalNewEmployees,
       });
     } catch (err) {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+
+  //Tính tổng sản phẩm sắp hết hàng
+  outstock1: async (req, res, next) => {
+    try {
+      const conditionFind = {
+        stock: { $lt: 10 }, // số lượng trong kho nhỏ hơn 10
+      };
+      // Sử dụng Aggregation Framework để tính tổng số sản phẩm hết hàng
+      const totalOutstock = await Product.aggregate([
+        { $match: conditionFind }, // Lọc các sản phẩm thỏa điều kiện
+        { $count: "totalOutstock" }, // Tính tổng số sản phẩm hết hàng
+      ]);
+
+      // Kiểm tra nếu mảng totalOutstock rỗng, trả về 0
+      const totalOutstockCount =
+        totalOutstock.length > 0 ? totalOutstock[0].totalOutstock : 0;
+
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        totalOutstock: totalOutstockCount,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
+  //Hiển thị danh sách top 5 sản phẩm bán chạy nhất
+  bestsellerlist: async (req, res, next) => {
+    try {
+      // Thực hiện truy vấn để lấy thông tin từng sản phẩm và tính tổng số lượng đã bán
+      const bestSellingProducts = await Order.aggregate([
+        {
+          $unwind: "$orderDetails", // Tách mảng orderDetails thành các tài liệu riêng biệt
+        },
+        {
+          $group: {
+            _id: "$orderDetails.productId", // Nhóm theo productId
+            totalQuantity: { $sum: "$orderDetails.quantity" }, // Tính tổng số lượng của mỗi sản phẩm đã bán
+          },
+        },
+        {
+          $sort: { totalQuantity: -1 }, // Sắp xếp theo totalQuantity giảm dần
+        },
+        {
+          $limit: 5, // Giới hạn chỉ lấy 5 sản phẩm
+        },
+        {
+          $lookup: {
+            from: "products", // Thay "products" bằng tên bộ sưu tập của mô hình Product
+            localField: "_id",
+            foreignField: "_id",
+            as: "productInfo",
+          },
+        },
+        {
+          $unwind: "$productInfo", // Tách mảng productInfo thành các tài liệu riêng biệt
+        },
+        {
+          $project: {
+            _id: 1,
+            totalQuantity: 1,
+            name: "$productInfo.name",
+            price: "$productInfo.price",
+            discountedPrice: "$productInfo.discountedPrice", // Thêm discountedPrice vào kết quả
+          },
+        },
+      ]);
   
-  
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        totalResult: bestSellingProducts.length,
+        payload: bestSellingProducts,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
 };
