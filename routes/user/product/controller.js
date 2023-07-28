@@ -105,25 +105,7 @@ module.exports = {
     try {
       const { id } = req.params;  
       const updateData = req.body;
-      const { categoryId, supplierId } = updateData;
 
-      const findCategory = Category.findById(categoryId);
-      const findSupplier = Supplier.findById(supplierId);
-
-      const [category, supplier] = await Promise.all([findCategory, findSupplier]);
-
-      const errors = [];
-      if (!category || category.isDelete) errors.push('Danh mục không tồn tại');
-      if (!supplier || supplier.isDelete) errors.push('Nhà cung cấp không tồn tại');
-
-      if (errors.length > 0) {
-        return res.status(404).json({
-          code: 404,
-          message: "Không tồn tại",
-          errors,
-        });
-      }
-  
       const found = await Product.findByIdAndUpdate(id, updateData, {
         new: true,
       });
