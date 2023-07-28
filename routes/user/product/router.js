@@ -10,10 +10,14 @@ const {
   getProductAll,
   // getProductList, // thêm bộ lọc và tìm kiếm
   getProductDetail,
+  updateProduct
 } = require('./controller');
 
 router.route('/').get(getProductAll)
 
-router.route('/:id').get(validateSchema(getProductSchema), getProductDetail)
+router.route('/:id')
+  .get(validateSchema(getProductSchema), getProductDetail)
+  .patch(updateProduct)
+
 
 module.exports = router;
