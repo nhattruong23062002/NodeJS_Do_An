@@ -2033,7 +2033,6 @@ module.exports = {
           $lte: new Date(), // Ngày tạo phải nhỏ hơn hoặc bằng ngày hiện tại (đến cuối ngày)
         },
       };
-
       const totalNewEmployees = await Employee.countDocuments(conditionFind);
       return res.send({
         code: 200,
@@ -2074,6 +2073,7 @@ module.exports = {
   //Hiển thị danh sách top 5 sản phẩm bán chạy nhất
   bestsellerlist: async (req, res, next) => {
     try {
+      
       // Thực hiện truy vấn để lấy thông tin từng sản phẩm và tính tổng số lượng đã bán
       const bestSellingProducts = await Order.aggregate([
         {
@@ -2123,4 +2123,90 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+
+   //Hiển thỉ ra danh sách tính ổng thu nhập dự trên price, discount, quantity, status có tên nhân viên, khách hàng
+   listorders: async (req, res, next) => {
+    try {
+      const conditionFind = {};
+  
+      // Thực hiện truy vấn để lấy các đơn hàng thỏa điều kiện
+      const completedOrders = await Order.find(conditionFind)
+        .populate("customer", "firstName lastName") // Lấy thông tin của khách hàng (chỉ lấy tên)
+        .populate("employee", "firstName lastName") // Lấy thông tin của nhân viên (chỉ lấy tên)
+        .populate({
+          path: "orderDetails.product",
+          model: "Product",
+          select: "name price _id", // Lấy thông tin của sản phẩm
+        })
+        .lean(); // Chuyển kết quả từ đối tượng Mongoose sang đối tượng JavaScript thông thường
+  
+      // Tạo một mảng mới chứa thông tin về đơn hàng và các orderDetails cùng với tổng giá của từng orderDetails
+      const ordersWithTotalPrice = completedOrders.map((order) => {
+        // Tính tổng tiền của tất cả các orderDetail trong đơn hàng
+        let totalOrderPrice = 0;
+        const orderDetailsWithTotalPrice = order.orderDetails.map(
+          (orderDetail) => {
+            const totalOrderDetailPrice =
+              orderDetail.product.price * orderDetail.quantity;
+  
+            // Kiểm tra xem có giảm giá cho orderDetail này không và tính tổng giá sau giảm giá nếu có
+            if (order.discount) {
+              const discountedTotalOrderDetailPrice =
+                totalOrderDetailPrice * (1 - order.discount / 100);
+              totalOrderPrice += discountedTotalOrderDetailPrice;
+              return {
+                productId: orderDetail.product._id, // Lấy _id của sản phẩm
+                productName: orderDetail.product.name,
+                productPrice: orderDetail.product.price,
+                quantity: orderDetail.quantity,
+                discount: order.discount,
+                totalOrderDetailPrice: discountedTotalOrderDetailPrice,
+              };
+            } else {
+              totalOrderPrice += totalOrderDetailPrice;
+              return {
+                productId: orderDetail.product._id, // Lấy _id của sản phẩm
+                productName: orderDetail.product.name,
+                productPrice: orderDetail.product.price,
+                quantity: orderDetail.quantity,
+                totalOrderDetailPrice: totalOrderDetailPrice,
+              };
+            }
+          }
+        );
+  
+        // Trả về đối tượng mới chứa thông tin về đơn hàng và các orderDetails kèm theo tổng giá của từng orderDetails
+        return {
+          order: {
+            _id: order._id,
+            createdDate: order.createdDate,
+            paymentType: order.paymentType,
+            status: order.status,
+            shippingAddress: order.shippingAddress,
+            customer: order.customer,
+            employee: order.employee,
+          },
+          orderDetails: orderDetailsWithTotalPrice,
+          totalOrderPrice: totalOrderPrice, // Tổng tiền của đơn hàng
+        };
+      });
+  
+      // Tính tổng thu nhập từ tất cả các đơn hàng
+      const totalIncome = ordersWithTotalPrice.reduce(
+        (total, order) => total + order.totalOrderPrice,
+        0
+      );
+  
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        totalResult: ordersWithTotalPrice.length,
+        totalIncome: totalIncome,
+        payload: ordersWithTotalPrice,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
 };
