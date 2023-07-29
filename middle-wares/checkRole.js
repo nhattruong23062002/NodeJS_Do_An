@@ -15,7 +15,7 @@ const allowRoles = (role) => {
     // AFTER DECODE TOKEN: GET UID FROM PAYLOAD
       const employee = await Employee.findById(payload._id).select('-password').lean();
 
-      if (employee && employee.role.includes(role)) {
+      if (employee && employee.role === 1) {
         return next();
       }
 

@@ -206,7 +206,7 @@ module.exports = {
       let found = await Employee.findByIdAndDelete(id);
 
       if (found) {
-        return res.send({ code: 200, payload: found, message: 'Xóa thành công' });
+        return res.send({ code: 200, success: true, payload: found, message: 'Xóa thành công' });
       }
 
       return res.status(410).send({ code: 404, message: 'Không tìm thấy' });
@@ -249,6 +249,7 @@ module.exports = {
       if (found) {
         return res.send({
           code: 200,
+          success: true,
           message: 'Cập nhật thành công',
           payload: found,
         });
@@ -256,7 +257,7 @@ module.exports = {
 
       return res.status(404).send({ code: 404, message: 'Không tìm thấy' });
     } catch (error) {
-      return res.status(500).json({ code: 500, error: err });
+      return res.status(500).json({ code: 500, error: error });
     }
   },
 };
