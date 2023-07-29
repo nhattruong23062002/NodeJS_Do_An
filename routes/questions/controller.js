@@ -1769,6 +1769,7 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+
   //Tính ra tổng nhân viên
   totalstaff: async (req, res, next) => {
     try {
@@ -1844,6 +1845,30 @@ module.exports = {
     }
   },
 
+   //Tính ra tổng khách hàng
+   totalcustomer: async (req, res, next) => {
+    try {
+      // Điều kiện để lấy tất cả khách hàng (có thể không cần điều kiện)
+      const conditionFind = {};
+
+      // Thực hiện truy vấn để lấy những khách hàng thỏa điều kiện
+      let results = await Customer.find(conditionFind).lean();
+
+      // Tính tổng số khách hàng trong cơ sở dữ liệu
+      let total = await Customer.countDocuments();
+
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        total,
+        totalResult: results.length,
+        payload: results,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
   //Tính ra tổng đơn hàng
   totalorder: async (req, res, next) => {
     try {
@@ -1869,13 +1894,14 @@ module.exports = {
   },
 
   //Hiển thỉ ra danh sách tính ổng thu nhập dự trên price, discount, quantity, status có tên nhân viên, khách hàng
+  //Lọc theo trạng thái đơn hàng đã hoàn thành
   CompletedOrders: async (req, res, next) => {
     try {
       // Điều kiện để lấy danh sách đơn hàng đã hoàn thành
       const conditionFind = {
         status: "COMPLETED", // Lọc theo trạng thái đơn hàng đã hoàn thành
       };
-  
+
       // Thực hiện truy vấn để lấy các đơn hàng thỏa điều kiện
       const completedOrders = await Order.find(conditionFind)
         .populate("customer", "firstName lastName") // Lấy thông tin của khách hàng (chỉ lấy tên)
@@ -1886,7 +1912,7 @@ module.exports = {
           select: "name price _id", // Lấy thông tin của sản phẩm
         })
         .lean(); // Chuyển kết quả từ đối tượng Mongoose sang đối tượng JavaScript thông thường
-  
+
       // Tạo một mảng mới chứa thông tin về đơn hàng và các orderDetails cùng với tổng giá của từng orderDetails
       const ordersWithTotalPrice = completedOrders.map((order) => {
         // Tính tổng tiền của tất cả các orderDetail trong đơn hàng
@@ -1895,7 +1921,7 @@ module.exports = {
           (orderDetail) => {
             const totalOrderDetailPrice =
               orderDetail.product.price * orderDetail.quantity;
-  
+
             // Kiểm tra xem có giảm giá cho orderDetail này không và tính tổng giá sau giảm giá nếu có
             if (order.discount) {
               const discountedTotalOrderDetailPrice =
@@ -1921,7 +1947,7 @@ module.exports = {
             }
           }
         );
-  
+
         // Trả về đối tượng mới chứa thông tin về đơn hàng và các orderDetails kèm theo tổng giá của từng orderDetails
         return {
           order: {
@@ -1937,13 +1963,13 @@ module.exports = {
           totalOrderPrice: totalOrderPrice, // Tổng tiền của đơn hàng
         };
       });
-  
+
       // Tính tổng thu nhập từ tất cả các đơn hàng
       const totalIncome = ordersWithTotalPrice.reduce(
         (total, order) => total + order.totalOrderPrice,
         0
       );
-  
+
       // Trả về kết quả dưới dạng JSON
       return res.send({
         code: 200,
@@ -1987,15 +2013,6 @@ module.exports = {
       const conditionFind = {
         stock: 0, // số lượng trong kho bằng 0
       };
-
-      //cách 1
-      // // Thực hiện truy vấn để lấy những sản phẩm thỏa điều kiện
-      // let results = await Order.find(conditionFind).lean();
-
-      // // Tính tổng số sản phẩm trong cơ sở dữ liệu
-      // let total = await Order.countDocuments();
-
-      //Cách 2
       // Sử dụng Aggregation Framework để tính tổng số sản phẩm hết hàng
       const totalOutstock = await Product.aggregate([
         { $match: conditionFind }, // Lọc các sản phẩm thỏa điều kiện
@@ -2006,10 +2023,16 @@ module.exports = {
       const totalOutstockCount =
         totalOutstock.length > 0 ? totalOutstock[0].totalOutstock : 0;
 
+      // Lấy thông tin của sản phẩm mới và chỉ lấy những trường cần thiết
+      const newProduct = await Product.find(conditionFind)
+        .select("_id name photo stock price ")
+        .lean();
+
       // Trả về kết quả dưới dạng JSON
       return res.send({
         code: 200,
         totalOutstock: totalOutstockCount,
+        newProduct: newProduct,
       });
     } catch (err) {
       return res.status(500).json({ code: 500, error: err });
@@ -2034,10 +2057,19 @@ module.exports = {
         },
       };
       const totalNewEmployees = await Employee.countDocuments(conditionFind);
+
+      const completedOrders = await Employee.find(conditionFind);
+
+      // Lấy thông tin của nhân viên mới và chỉ lấy những trường cần thiết
+      const newEmployees = await Employee.find(conditionFind)
+        .select("firstName lastName address birthday sex phoneNumber")
+        .lean();
+
       return res.send({
         code: 200,
         message: "Tổng số nhân viên mới trong 1 tuần gần nhất",
         totalNewEmployees: totalNewEmployees,
+        newEmployees: newEmployees,
       });
     } catch (err) {
       return res.status(500).json({ code: 500, error: err });
@@ -2073,7 +2105,6 @@ module.exports = {
   //Hiển thị danh sách top 5 sản phẩm bán chạy nhất
   bestsellerlist: async (req, res, next) => {
     try {
-      
       // Thực hiện truy vấn để lấy thông tin từng sản phẩm và tính tổng số lượng đã bán
       const bestSellingProducts = await Order.aggregate([
         {
@@ -2124,11 +2155,11 @@ module.exports = {
     }
   },
 
-   //Hiển thỉ ra danh sách tính ổng thu nhập dự trên price, discount, quantity, status có tên nhân viên, khách hàng
-   listorders: async (req, res, next) => {
+  //Hiển thỉ ra danh sách tính ổng thu nhập dự trên price, discount, quantity, status có tên nhân viên, khách hàng
+  listorders: async (req, res, next) => {
     try {
       const conditionFind = {};
-  
+
       // Thực hiện truy vấn để lấy các đơn hàng thỏa điều kiện
       const completedOrders = await Order.find(conditionFind)
         .populate("customer", "firstName lastName") // Lấy thông tin của khách hàng (chỉ lấy tên)
@@ -2139,7 +2170,7 @@ module.exports = {
           select: "name price _id", // Lấy thông tin của sản phẩm
         })
         .lean(); // Chuyển kết quả từ đối tượng Mongoose sang đối tượng JavaScript thông thường
-  
+
       // Tạo một mảng mới chứa thông tin về đơn hàng và các orderDetails cùng với tổng giá của từng orderDetails
       const ordersWithTotalPrice = completedOrders.map((order) => {
         // Tính tổng tiền của tất cả các orderDetail trong đơn hàng
@@ -2148,7 +2179,7 @@ module.exports = {
           (orderDetail) => {
             const totalOrderDetailPrice =
               orderDetail.product.price * orderDetail.quantity;
-  
+
             // Kiểm tra xem có giảm giá cho orderDetail này không và tính tổng giá sau giảm giá nếu có
             if (order.discount) {
               const discountedTotalOrderDetailPrice =
@@ -2174,7 +2205,7 @@ module.exports = {
             }
           }
         );
-  
+
         // Trả về đối tượng mới chứa thông tin về đơn hàng và các orderDetails kèm theo tổng giá của từng orderDetails
         return {
           order: {
@@ -2190,13 +2221,13 @@ module.exports = {
           totalOrderPrice: totalOrderPrice, // Tổng tiền của đơn hàng
         };
       });
-  
+
       // Tính tổng thu nhập từ tất cả các đơn hàng
       const totalIncome = ordersWithTotalPrice.reduce(
         (total, order) => total + order.totalOrderPrice,
         0
       );
-  
+
       // Trả về kết quả dưới dạng JSON
       return res.send({
         code: 200,
@@ -2208,5 +2239,4 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
-
 };
