@@ -1820,6 +1820,30 @@ module.exports = {
     }
   },
 
+  //Tính ra tổng nhà cung cấp
+  totalsupplier: async (req, res, next) => {
+    try {
+      // Điều kiện để lấy tất cả sản phẩm (có thể không cần điều kiện)
+      const conditionFind = {};
+
+      // Thực hiện truy vấn để lấy những sản phẩm thỏa điều kiện
+      let results = await Supplier.find(conditionFind).lean();
+
+      // Tính tổng số sản phẩm trong cơ sở dữ liệu
+      let total = await Supplier.countDocuments();
+
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        total,
+        totalResult: results.length,
+        payload: results,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
   //Tính ra tổng đơn hàng
   totalorder: async (req, res, next) => {
     try {
@@ -1844,62 +1868,89 @@ module.exports = {
     }
   },
 
-  //Tính tổng thu nhập dự trên price, discount, quantity, status
-
-  totalIncome: async (req, res, next) => {
+  //Hiển thỉ ra danh sách tính ổng thu nhập dự trên price, discount, quantity, status có tên nhân viên, khách hàng
+  CompletedOrders: async (req, res, next) => {
     try {
+      // Điều kiện để lấy danh sách đơn hàng đã hoàn thành
       const conditionFind = {
-        status: "COMPLETED", //trạng thái đơn hàng đã hoàn thành
+        status: "COMPLETED", // Lọc theo trạng thái đơn hàng đã hoàn thành
       };
-
-      const totalIncomeResult = await Order.aggregate([
-        { $match: conditionFind }, // Lọc các đơn hàng theo điều kiện conditionFind
-        { $unwind: "$orderDetails" }, // Tách các phần tử trong mảng orderDetails thành từng document riêng biệt
-        {
-          $group: {
-            _id: null,
-            //Công thức totalIncome = SUM(price * quantity * (1 - discount/100))
-            //1 - discount/100: giá trị sau khi áp dụng giảm giá
-            totalIncome: {
-              $sum: {
-                $multiply: [
-                  {
-                    $multiply: [
-                      "$orderDetails.price",
-                      "$orderDetails.quantity",
-                    ],
-                  },
-                  { $subtract: [1, { $divide: ["$discount", 100] }] }, // Áp dụng giảm giá theo đơn vị %
-                ],
-              },
-            },
+  
+      // Thực hiện truy vấn để lấy các đơn hàng thỏa điều kiện
+      const completedOrders = await Order.find(conditionFind)
+        .populate("customer", "firstName lastName") // Lấy thông tin của khách hàng (chỉ lấy tên)
+        .populate("employee", "firstName lastName") // Lấy thông tin của nhân viên (chỉ lấy tên)
+        .populate({
+          path: "orderDetails.product",
+          model: "Product",
+          select: "name price _id", // Lấy thông tin của sản phẩm
+        })
+        .lean(); // Chuyển kết quả từ đối tượng Mongoose sang đối tượng JavaScript thông thường
+  
+      // Tạo một mảng mới chứa thông tin về đơn hàng và các orderDetails cùng với tổng giá của từng orderDetails
+      const ordersWithTotalPrice = completedOrders.map((order) => {
+        // Tính tổng tiền của tất cả các orderDetail trong đơn hàng
+        let totalOrderPrice = 0;
+        const orderDetailsWithTotalPrice = order.orderDetails.map(
+          (orderDetail) => {
+            const totalOrderDetailPrice =
+              orderDetail.product.price * orderDetail.quantity;
+  
+            // Kiểm tra xem có giảm giá cho orderDetail này không và tính tổng giá sau giảm giá nếu có
+            if (order.discount) {
+              const discountedTotalOrderDetailPrice =
+                totalOrderDetailPrice * (1 - order.discount / 100);
+              totalOrderPrice += discountedTotalOrderDetailPrice;
+              return {
+                productId: orderDetail.product._id, // Lấy _id của sản phẩm
+                productName: orderDetail.product.name,
+                productPrice: orderDetail.product.price,
+                quantity: orderDetail.quantity,
+                discount: order.discount,
+                totalOrderDetailPrice: discountedTotalOrderDetailPrice,
+              };
+            } else {
+              totalOrderPrice += totalOrderDetailPrice;
+              return {
+                productId: orderDetail.product._id, // Lấy _id của sản phẩm
+                productName: orderDetail.product.name,
+                productPrice: orderDetail.product.price,
+                quantity: orderDetail.quantity,
+                totalOrderDetailPrice: totalOrderDetailPrice,
+              };
+            }
+          }
+        );
+  
+        // Trả về đối tượng mới chứa thông tin về đơn hàng và các orderDetails kèm theo tổng giá của từng orderDetails
+        return {
+          order: {
+            _id: order._id,
+            createdDate: order.createdDate,
+            paymentType: order.paymentType,
+            status: order.status,
+            shippingAddress: order.shippingAddress,
+            customer: order.customer,
+            employee: order.employee,
           },
-        }, // Nhóm và tính tổng thu nhập sau khi áp dụng giảm giá từ tích giữa giá và số lượng trong mảng orderDetails
-        { $project: { _id: 0, totalIncome: 1 } }, // Chỉ trả về trường totalIncome
-      ]);
-
-      // Kiểm tra trường totalIncome trong kết quả truy vấn
-      if (
-        totalIncomeResult[0] &&
-        totalIncomeResult[0].totalIncome !== undefined
-      ) {
-        // Nếu tồn tại, lấy giá trị tổng thu nhập từ kết quả truy vấn
-        const totalIncome = parseFloat(totalIncomeResult[0].totalIncome);
-        // Trả về kết quả dưới dạng JSON với số thực là totalIncome
-        return res.send({
-          code: 200,
-          message: "Tính tổng thu nhập thành công",
-          totalIncome: totalIncome,
-        });
-      } else {
-        // Nếu không tồn tại, gán giá trị mặc định cho totalIncome
-        const defaultTotalIncome = 0;
-        // Trả về kết quả dưới dạng JSON với giá trị mặc định cho totalIncome
-        return res.send({
-          code: 200,
-          totalIncome: defaultTotalIncome,
-        });
-      }
+          orderDetails: orderDetailsWithTotalPrice,
+          totalOrderPrice: totalOrderPrice, // Tổng tiền của đơn hàng
+        };
+      });
+  
+      // Tính tổng thu nhập từ tất cả các đơn hàng
+      const totalIncome = ordersWithTotalPrice.reduce(
+        (total, order) => total + order.totalOrderPrice,
+        0
+      );
+  
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        totalResult: ordersWithTotalPrice.length,
+        totalIncome: totalIncome,
+        payload: ordersWithTotalPrice,
+      });
     } catch (err) {
       return res.status(500).json({ code: 500, error: err });
     }
@@ -1965,34 +2016,6 @@ module.exports = {
     }
   },
 
-  //Tính tổng số nhân viên mới
-  // countNewEmployees: async (req, res, next) => {
-  //   try {
-  //     // Để tính tổng số nhân viên mới, sử dụng điều kiện là 'isActive: true' (nhân viên đang hoạt động)
-  //     // và 'createdAt' trong khoảng thời gian từ bắt đầu ngày hiện tại đến cuối ngày hiện tại
-  //     const today = new Date();
-  //     today.setUTCHours(0, 0, 0, 0); // Đưa về thời điểm bắt đầu của ngày hiện tại
-  //     const nextDay = new Date(today);
-  //     nextDay.setUTCDate(nextDay.getUTCDate() + 1); // Lấy ngày tiếp theo để đến cuối ngày hiện tại
-
-  //     const conditionFind = {
-  //       isActive: true,
-  //       createdAt: {
-  //         $gte: today, // Ngày tạo phải lớn hơn hoặc bằng ngày bắt đầu
-  //         $lt: nextDay, // Ngày tạo phải nhỏ hơn ngày tiếp theo (đến cuối ngày)
-  //       },
-  //     };
-  //     const totalNewEmployees = await Employee.countDocuments(conditionFind);
-  //     return res.send({
-  //       code: 200,
-  //       message: "Tổng số nhân viên mới",
-  //       totalNewEmployees: totalNewEmployees,
-  //     });
-  //   } catch (err) {
-  //     return res.status(500).json({ code: 500, error: err });
-  //   }
-  // },
-
   // Tính tổng số nhân viên mới trong 1 tuần gần nhất
   countNewEmployees: async (req, res, next) => {
     try {
@@ -2007,7 +2030,7 @@ module.exports = {
         isActive: true,
         createdAt: {
           $gte: oneWeekAgo, // Ngày tạo phải lớn hơn hoặc bằng ngày bắt đầu của tuần trước
-          $lt: today, // Ngày tạo phải nhỏ hơn ngày hiện tại (đến cuối ngày)
+          $lte: new Date(), // Ngày tạo phải nhỏ hơn hoặc bằng ngày hiện tại (đến cuối ngày)
         },
       };
 
@@ -2070,10 +2093,10 @@ module.exports = {
         },
         {
           $lookup: {
-            from: "products", // Thay "products" bằng tên bộ sưu tập của mô hình Product
+            from: "products", // Bộ sưu tập "products" chứa các tài liệu (documents)
             localField: "_id",
             foreignField: "_id",
-            as: "productInfo",
+            as: "productInfo", // Kết quả của truy vấn sẽ được lưu vào trường "productInfo", trường "productInfo" là trường mới được tạo ra khi truy vấn
           },
         },
         {
@@ -2089,7 +2112,7 @@ module.exports = {
           },
         },
       ]);
-  
+
       // Trả về kết quả dưới dạng JSON
       return res.send({
         code: 200,
@@ -2100,5 +2123,4 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
-
 };
