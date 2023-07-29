@@ -51,12 +51,13 @@ const {
   totalstaff,
   grossproduct,
   totalorder,
-  totalIncome,
   canceledorder,
   outstock,
   countNewEmployees,
   outstock1,
   bestsellerlist,
+  totalsupplier,
+  CompletedOrders,
 } = require('./controller');
 
 router.get('/1', question1);
@@ -104,12 +105,13 @@ router.get('/filterCategory', filterCategory);
 router.get('/totalstaff', totalstaff);
 router.get('/grossproduct', grossproduct);
 router.get('/totalorder', totalorder);
-router.get('/totalIncome', totalIncome);
 router.get('/canceledorder', canceledorder);
 router.get('/outstock', outstock);
 router.get('/countNewEmployees', countNewEmployees);
 router.get('/outstock1', outstock1);
 router.get('/bestsellerlist', bestsellerlist);
+router.get('/totalsupplier', totalsupplier);
+router.get('/CompletedOrders', CompletedOrders);
 
 
 
