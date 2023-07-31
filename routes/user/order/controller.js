@@ -154,4 +154,11 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+
+  payment: async function (req, res, next) {
+    return res.status(200).json({
+      status:"oke",
+      data: process.env.CLIENT_ID
+    })
+  }
 };
