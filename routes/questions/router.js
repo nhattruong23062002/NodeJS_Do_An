@@ -61,6 +61,7 @@ const {
   listorders,
   totalcustomer,
   grossprcate,
+  getTop5Customers,
 } = require('./controller');
 
 router.get('/1', question1);
@@ -118,6 +119,8 @@ router.get('/CompletedOrders', CompletedOrders);
 router.get('/listorders', listorders);
 router.get('/totalcustomer', totalcustomer);
 router.get('/grossprcate', grossprcate);
+router.get('/getTop5Customers', getTop5Customers);
+
 
 
 module.exports = router;
