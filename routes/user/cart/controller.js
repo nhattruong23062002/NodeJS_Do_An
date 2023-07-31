@@ -152,12 +152,13 @@ module.exports = {
             quantity,
           });
         } else {
-          const nextQuantity = quantity + checkProductExits.quantity;
+          const nextQuantity = parseInt(checkProductExits.quantity) + parseInt(quantity);
+
 
           if (nextQuantity > foundProduct.stock) {
             return res.send({
               code: 404,
-              message: `Số lượng sản phẩm ${product._id} không khả dụng`,
+              message: `Số lượng sản phẩm không khả dụng`,
             });
           }
 
@@ -222,12 +223,7 @@ module.exports = {
 
       if (cart.products.length === 1 && cart.products[0].productId === productId) {
         await Cart.deleteOne({ _id: cart._id });
-      } /* else {
-        await Cart.findOneAndUpdate({ _id: cart._id }, {
-          customerId,
-          products: cart.products.filter((item) => item.productId !==  new ObjectId(productId)),
-        }); */
-        else {
+      }else {
           await cart.updateOne({
             $pull: { products: { productId: productId } }
           });

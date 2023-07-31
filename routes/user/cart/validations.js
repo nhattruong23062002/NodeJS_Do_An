@@ -1,5 +1,5 @@
-const yup = require('yup');
-const ObjectId = require('mongodb').ObjectId;
+const yup = require("yup");
+const ObjectId = require("mongodb").ObjectId;
 
 module.exports = {
   // getSchema: yup.object({
@@ -26,7 +26,7 @@ module.exports = {
 
   getDetailSchema: yup.object({
     params: yup.object({
-      id: yup.string().test('validationID', 'ID sai định dạng', (value) => {
+      id: yup.string().test("validationID", "ID sai định dạng", (value) => {
         return ObjectId.isValid(value);
       }),
     }),
@@ -34,12 +34,16 @@ module.exports = {
 
   removeSchema: yup.object({
     body: yup.object({
-      customerId: yup.string().test('validationID', 'ID sai định dạng', (value) => {
-        return ObjectId.isValid(value);
-      }),
-      productId: yup.string().test('validationID', 'ID sai định dạng', (value) => {
-        return ObjectId.isValid(value);
-      }),
+      customerId: yup
+        .string()
+        .test("validationID", "ID sai định dạng", (value) => {
+          return ObjectId.isValid(value);
+        }),
+      productId: yup
+        .string()
+        .test("validationID", "ID sai định dạng", (value) => {
+          return ObjectId.isValid(value);
+        }),
     }),
   }),
 
@@ -48,18 +52,18 @@ module.exports = {
       customerId: yup
         .string()
         .required()
-        .test('validationCustomerID', 'ID sai định dạng', (value) => {
-          return ObjectId.isValid(value);
-        }),
-        
-      productId: yup
-        .string()
-        .required()
-        .test('validationProductID', 'ID sai định dạng', (value) => {
+        .test("validationCustomerID", "ID sai định dạng", (value) => {
           return ObjectId.isValid(value);
         }),
 
-      quantity: yup.number().required().min(0),
+      productId: yup
+        .string()
+        .required()
+        .test("validationProductID", "ID sai định dạng", (value) => {
+          return ObjectId.isValid(value);
+        }),
+
+      quantity: yup.number().required(),
     }),
   }),
 };

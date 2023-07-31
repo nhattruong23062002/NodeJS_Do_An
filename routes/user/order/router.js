@@ -12,7 +12,10 @@ const {
   create,
   remove,
   update,
+  payment
 } = require('./controller');
+
+router.route('/payment').get(payment)
 
 router.route('/')
   .get(getAll)
