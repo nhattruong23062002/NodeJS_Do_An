@@ -2239,4 +2239,48 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+
+  //Hiển thị tất cả thông tin product và tên categories
+  grossprcate: async (req, res, next) => {
+    try {
+      // Điều kiện để lấy tất cả sản phẩm (có thể không cần điều kiện)
+      const conditionFind = {};
+  
+      // Thực hiện truy vấn để lấy những sản phẩm thỏa điều kiện
+      let results = await Product.find(conditionFind).lean();
+  
+      // Lấy mã danh mục của từng sản phẩm
+      const categoryIds = results.map((product) => product.categoryId);
+  
+      // Thực hiện truy vấn để lấy thông tin danh mục sản phẩm
+      let categories = await Category.find({ _id: { $in: categoryIds } }).lean();
+  
+      // Tạo một đối tượng Map để ánh xạ mã danh mục sang thông tin danh mục
+      const categoryMap = new Map();
+      categories.forEach((category) => {
+        categoryMap.set(category._id.toString(), category);
+      });
+  
+      // Kết hợp thông tin danh mục vào kết quả sản phẩm
+      results.forEach((product) => {
+        const categoryId = product.categoryId.toString();
+        if (categoryMap.has(categoryId)) {
+          product.category = categoryMap.get(categoryId).name;
+        }
+      });
+  
+      // Tính tổng số sản phẩm trong cơ sở dữ liệu
+      let total = await Product.countDocuments();
+  
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        total,
+        totalResult: results.length,
+        payload: results,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
 };

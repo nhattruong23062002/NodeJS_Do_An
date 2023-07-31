@@ -60,6 +60,7 @@ const {
   CompletedOrders,
   listorders,
   totalcustomer,
+  grossprcate,
 } = require('./controller');
 
 router.get('/1', question1);
@@ -116,7 +117,7 @@ router.get('/totalsupplier', totalsupplier);
 router.get('/CompletedOrders', CompletedOrders);
 router.get('/listorders', listorders);
 router.get('/totalcustomer', totalcustomer);
-
+router.get('/grossprcate', grossprcate);
 
 
 module.exports = router;
