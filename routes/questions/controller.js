@@ -2283,4 +2283,59 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+
+  //Hiển thị top 5 khách hàng mua hàng nhiều nhất
+  getTop5Customers: async (req, res, next) => {
+    try {
+      const pipeline = [
+        {
+          $unwind: '$orderDetails', // Tách mỗi bản ghi trong mảng orderDetails thành các bản ghi riêng lẻ
+        },
+        {
+          $group: {
+            _id: '$customerId', // Nhóm theo trường customerId trong cơ sở dữ liệu
+            totalPurchase: { $sum: '$orderDetails.quantity' }, // Tính tổng số lượng hàng đã mua của từng khách hàng
+            totalPrice: { $sum: { $multiply: ['$orderDetails.quantity', '$orderDetails.price'] } }, // Tính tổng tiền mua hàng của từng khách hàng
+          },
+        },
+        {
+          $lookup: {
+            from: 'customers', // Tên bảng 'customers' trong cơ sở dữ liệu
+            localField: '_id', // Trường ID của bảng 'Order'
+            foreignField: '_id', // Trường ID của bảng 'Customer'
+            as: 'customerInfo', // Tên của mảng chứa thông tin khách hàng sau khi tham chiếu
+          },
+        },
+        {
+          $unwind: '$customerInfo', // Tách mảng customerInfo thành các bản ghi riêng lẻ
+        },
+        {
+          $project: {
+            _id: 0, // Loại bỏ trường '_id' mặc định của group
+            customerId: '$_id', // Đổi tên trường '_id' thành 'customerId'
+            firstName: '$customerInfo.firstName', // Lấy trường 'firstName' từ mảng customerInfo
+            lastName: '$customerInfo.lastName', // Lấy trường 'lastName' từ mảng customerInfo
+            totalPurchase: 1, // Giữ nguyên trường 'totalPurchase'
+            totalPrice: 1, // Giữ nguyên trường 'totalPrice'
+          },
+        },
+        {
+          $sort: { totalPurchase: -1 }, // Sắp xếp theo tổng số lượng hàng mua giảm dần
+        },
+        {
+          $limit: 5, // Chỉ lấy 5 kết quả đầu tiên (top 5 khách hàng mua hàng nhiều nhất)
+        },
+      ];
+  
+      const topCustomers = await Order.aggregate(pipeline);
+  
+      return res.send({
+        code: 200,
+        payload: topCustomers,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+  
 };
