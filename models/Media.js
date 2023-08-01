@@ -12,7 +12,7 @@ const mediaSchema = new Schema(
   {
     name: { type: String, required: true },
     location: { type: String, required: true },
-    employeeId: { type: Schema.Types.ObjectId, ref: 'Employee', required: true },
+    customerId: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
   },
   {
     versionKey: false,
@@ -20,12 +20,13 @@ const mediaSchema = new Schema(
   },
 );
 
-mediaSchema.virtual('employee', {
-  ref: 'Employee',
-  localField: 'employeeId',
+mediaSchema.virtual('customer', {
+  ref: 'Customer',
+  localField: 'customerId',
   foreignField: '_id',
   justOne: true,
 });
+
 
 // Config
 mediaSchema.set('toJSON', { virtuals: true });

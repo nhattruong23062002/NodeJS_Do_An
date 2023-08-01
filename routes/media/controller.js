@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const { Customer } = require('../../models');
+
 
 // MULTER UPLOAD
 const upload = require('../../middle-wares/fileMulter');
@@ -13,7 +15,24 @@ const {
   insertDocuments,
 } = require('../../helpers/MongoDbHelper');
 
+async function updateCustomerAvatarUrl(customerId, imageUrl) {
+  try {
+    const customer = await Customer.findByIdAndUpdate(
+      customerId,
+      { avatarUrl: imageUrl }, // Cập nhật đường dẫn mới vào trường avatarUrl
+      { new: true } // Tùy chọn này để trả về thông tin sau khi cập nhật
+    );
+
+    // Trả về thông tin khách hàng sau khi cập nhật
+    return customer;
+  } catch (error) {
+    // Xử lý lỗi nếu cần thiết
+    throw error;
+  }
+}
 module.exports = {
+
+  
   uploadSingle: async (req, res, next) => upload.single('file')(req, res, async (err) => {
     try {
       if (err instanceof multer.MulterError) {
@@ -24,13 +43,15 @@ module.exports = {
         console.log('««««« file »»»»»', req.file);
 
         const name = req.file.filename;
-        const employeeId = req.user._id;
+        const customerId = req.user._id;
 
         console.log('««««« req.user »»»»»', req.user);
-        const imageUrl = `/uploads/media/${name}`;
+        const imageUrl = `public/uploads/media/${name}`;
+
+        await updateCustomerAvatarUrl(customerId, imageUrl);
 
         const response = await insertDocument(
-          { location: imageUrl, name, employeeId },
+          { location: imageUrl, name, customerId },
           'Media',
         );
         res.status(200).json({
