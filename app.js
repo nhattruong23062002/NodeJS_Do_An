@@ -8,7 +8,6 @@ const { default: mongoose } = require('mongoose');
 const passport = require('passport');
 
 
-
 require('dotenv').config()
 
 const { CONNECTION_STRING } = require('./constants/dbSettings');
@@ -43,7 +42,7 @@ mongoose.connect(CONNECTION_STRING);
 
 app.use('/', indexRouter);
 app.use('/questions', questionRouter);
-app.use('/media', passport.authenticate('jwt', { session: false }), mediaRouter);
+app.use('/media', passport.authenticate('jwtUser', { session: false }), mediaRouter);
 
 app.use('/admin', adminRoutes)
 app.use('/user', userRouter)
