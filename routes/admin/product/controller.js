@@ -100,7 +100,7 @@ module.exports = {
       let found = await Product.findByIdAndDelete(id);
   
       if (found) {
-        return res.send({ code: 200, payload: found, message: 'Xóa thành công' });
+        return res.send({ code: 200,success:true, payload: found, message: 'Xóa thành công' });
       }
   
       return res.status(410).send({ code: 404, message: 'Không tìm thấy' });
@@ -138,7 +138,7 @@ module.exports = {
   
       if (found) {
         return res.send({
-          code: 200,
+          code: 200,success:true,
           message: 'Cập nhật thành công',
           payload: found,
         });
