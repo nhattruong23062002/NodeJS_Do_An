@@ -63,6 +63,7 @@ const {
   grossprcate,
   getTop5Customers,
   countNewCustomer,
+  calculateRevenueInAWeek,
 } = require('./controller');
 
 router.get('/1', question1);
@@ -122,6 +123,8 @@ router.get('/totalcustomer', totalcustomer);
 router.get('/grossprcate', grossprcate);
 router.get('/getTop5Customers', getTop5Customers);
 router.get('/countNewCustomer', countNewCustomer);
+router.get('/calculateRevenueInAWeek', calculateRevenueInAWeek);
+
 
 
 module.exports = router;

@@ -2378,4 +2378,50 @@ module.exports = {
     }
   },
 
+  // Hàm tính toán doanh thu theo từng ngày trong tuần cho các đơn hàng hoàn thành (COMPLETED)
+  calculateRevenueInAWeek: async (req, res, next) => {
+    try {
+      const startDate = new Date(); // Lấy ngày hiện tại
+      startDate.setDate(startDate.getDate() - 7); // Lấy ngày 7 ngày trước ngày hiện tại
+      const endDate = new Date(); // Ngày hiện tại
+  
+      const conditionFind = {
+        createdDate: { $gte: startDate, $lte: endDate }, // Lọc các đơn hàng có ngày tạo trong khoảng thời gian từ startDate đến endDate
+        status: 'COMPLETED', // Lọc các đơn hàng có trạng thái COMPLETED
+      };
+  
+      // Sử dụng Aggregation Framework để tính toán doanh thu theo từng ngày trong tuần
+      const revenueByDay = await Order.aggregate([
+        { $match: conditionFind }, // Lọc các đơn hàng thỏa điều kiện
+        { $unwind: '$orderDetails' }, // Tách các phần tử trong mảng orderDetails thành từng bản ghi riêng lẻ
+        {
+          $group: {
+            _id: { $dayOfWeek: '$createdDate' }, // Nhóm các đơn hàng theo ngày trong tuần sử dụng $dayOfWeek
+            totalRevenue: { $sum: "$orderDetails.price" } // Tính tổng doanh thu cho mỗi ngày
+          }
+        },
+        {
+          $project: {
+            dayOfWeek: '$_id', // Đổi tên trường _id thành dayOfWeek
+            totalRevenue: 1 // Bao gồm trường totalRevenue
+          }
+        }
+      ]);
+  
+      // Tạo một mảng để lưu trữ doanh thu cho mỗi ngày trong tuần (Chủ Nhật đến Thứ Bảy)
+      const revenueByDayOfWeek = new Array(7).fill(0);
+      revenueByDay.forEach((item) => {
+        revenueByDayOfWeek[item.dayOfWeek - 1] = item.totalRevenue;
+      });
+  
+      // Trả về kết quả dưới dạng JSON
+      return res.send({
+        code: 200,
+        revenueByDayOfWeek: revenueByDayOfWeek,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
 };
