@@ -1845,8 +1845,8 @@ module.exports = {
     }
   },
 
-   //Tính ra tổng khách hàng
-   totalcustomer: async (req, res, next) => {
+  //Tính ra tổng khách hàng
+  totalcustomer: async (req, res, next) => {
     try {
       // Điều kiện để lấy tất cả khách hàng (có thể không cần điều kiện)
       const conditionFind = {};
@@ -2245,22 +2245,24 @@ module.exports = {
     try {
       // Điều kiện để lấy tất cả sản phẩm (có thể không cần điều kiện)
       const conditionFind = {};
-  
+
       // Thực hiện truy vấn để lấy những sản phẩm thỏa điều kiện
       let results = await Product.find(conditionFind).lean();
-  
+
       // Lấy mã danh mục của từng sản phẩm
       const categoryIds = results.map((product) => product.categoryId);
-  
+
       // Thực hiện truy vấn để lấy thông tin danh mục sản phẩm
-      let categories = await Category.find({ _id: { $in: categoryIds } }).lean();
-  
+      let categories = await Category.find({
+        _id: { $in: categoryIds },
+      }).lean();
+
       // Tạo một đối tượng Map để ánh xạ mã danh mục sang thông tin danh mục
       const categoryMap = new Map();
       categories.forEach((category) => {
         categoryMap.set(category._id.toString(), category);
       });
-  
+
       // Kết hợp thông tin danh mục vào kết quả sản phẩm
       results.forEach((product) => {
         const categoryId = product.categoryId.toString();
@@ -2268,10 +2270,10 @@ module.exports = {
           product.category = categoryMap.get(categoryId).name;
         }
       });
-  
+
       // Tính tổng số sản phẩm trong cơ sở dữ liệu
       let total = await Product.countDocuments();
-  
+
       // Trả về kết quả dưới dạng JSON
       return res.send({
         code: 200,
@@ -2289,32 +2291,36 @@ module.exports = {
     try {
       const pipeline = [
         {
-          $unwind: '$orderDetails', // Tách mỗi bản ghi trong mảng orderDetails thành các bản ghi riêng lẻ
+          $unwind: "$orderDetails", // Tách mỗi bản ghi trong mảng orderDetails thành các bản ghi riêng lẻ
         },
         {
           $group: {
-            _id: '$customerId', // Nhóm theo trường customerId trong cơ sở dữ liệu
-            totalPurchase: { $sum: '$orderDetails.quantity' }, // Tính tổng số lượng hàng đã mua của từng khách hàng
-            totalPrice: { $sum: { $multiply: ['$orderDetails.quantity', '$orderDetails.price'] } }, // Tính tổng tiền mua hàng của từng khách hàng
+            _id: "$customerId", // Nhóm theo trường customerId trong cơ sở dữ liệu
+            totalPurchase: { $sum: "$orderDetails.quantity" }, // Tính tổng số lượng hàng đã mua của từng khách hàng
+            totalPrice: {
+              $sum: {
+                $multiply: ["$orderDetails.quantity", "$orderDetails.price"],
+              },
+            }, // Tính tổng tiền mua hàng của từng khách hàng
           },
         },
         {
           $lookup: {
-            from: 'customers', // Tên bảng 'customers' trong cơ sở dữ liệu
-            localField: '_id', // Trường ID của bảng 'Order'
-            foreignField: '_id', // Trường ID của bảng 'Customer'
-            as: 'customerInfo', // Tên của mảng chứa thông tin khách hàng sau khi tham chiếu
+            from: "customers", // Tên bảng 'customers' trong cơ sở dữ liệu
+            localField: "_id", // Trường ID của bảng 'Order'
+            foreignField: "_id", // Trường ID của bảng 'Customer'
+            as: "customerInfo", // Tên của mảng chứa thông tin khách hàng sau khi tham chiếu
           },
         },
         {
-          $unwind: '$customerInfo', // Tách mảng customerInfo thành các bản ghi riêng lẻ
+          $unwind: "$customerInfo", // Tách mảng customerInfo thành các bản ghi riêng lẻ
         },
         {
           $project: {
             _id: 0, // Loại bỏ trường '_id' mặc định của group
-            customerId: '$_id', // Đổi tên trường '_id' thành 'customerId'
-            firstName: '$customerInfo.firstName', // Lấy trường 'firstName' từ mảng customerInfo
-            lastName: '$customerInfo.lastName', // Lấy trường 'lastName' từ mảng customerInfo
+            customerId: "$_id", // Đổi tên trường '_id' thành 'customerId'
+            firstName: "$customerInfo.firstName", // Lấy trường 'firstName' từ mảng customerInfo
+            lastName: "$customerInfo.lastName", // Lấy trường 'lastName' từ mảng customerInfo
             totalPurchase: 1, // Giữ nguyên trường 'totalPurchase'
             totalPrice: 1, // Giữ nguyên trường 'totalPrice'
           },
@@ -2326,9 +2332,9 @@ module.exports = {
           $limit: 5, // Chỉ lấy 5 kết quả đầu tiên (top 5 khách hàng mua hàng nhiều nhất)
         },
       ];
-  
+
       const topCustomers = await Order.aggregate(pipeline);
-  
+
       return res.send({
         code: 200,
         payload: topCustomers,
@@ -2337,5 +2343,39 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+
+  // Tính tổng số khách hàng mới trong 1 tuần gần nhất
+  countNewCustomer: async (req, res, next) => {
+    try {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0); // Đưa về thời điểm bắt đầu của ngày hiện tại
+      const oneWeekAgo = new Date(today);
+      oneWeekAgo.setUTCDate(oneWeekAgo.getUTCDate() - 7); // Lấy ngày bắt đầu của tuần trước
+
+      const conditionFind = {
+        createdAt: {
+          $gte: oneWeekAgo, // Ngày tạo phải lớn hơn hoặc bằng ngày bắt đầu của tuần trước
+          $lte: new Date(), // Ngày tạo phải nhỏ hơn hoặc bằng ngày hiện tại (đến cuối ngày)
+        },
+      };
   
+      // Đếm số lượng khách hàng mới
+      const totalCustomer = await Customer.countDocuments(conditionFind);
+  
+      // Lấy thông tin của khách hàng mới và chỉ lấy những trường cần thiết
+      const newCustomer = await Customer.find(conditionFind)
+        .select("firstName lastName address birthday phoneNumber")
+        .lean();
+  
+      return res.send({
+        code: 200,
+        message: "Tổng số khách hàng mới trong 1 tuần gần nhất",
+        totalNewCustomer: totalCustomer,
+        newCustomer: newCustomer,
+      });
+    } catch (err) {
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
+
 };
