@@ -1921,7 +1921,7 @@ module.exports = {
           (orderDetail) => {
             const totalOrderDetailPrice =
               orderDetail.product.price * orderDetail.quantity;
-
+            
             // Kiểm tra xem có giảm giá cho orderDetail này không và tính tổng giá sau giảm giá nếu có
             if (order.discount) {
               const discountedTotalOrderDetailPrice =
@@ -1948,7 +1948,10 @@ module.exports = {
           }
         );
 
-        // Trả về đối tượng mới chứa thông tin về đơn hàng và các orderDetails kèm theo tổng giá của từng orderDetails
+        // Tính tiền ship cho đơn hàng (chỉ tính một lần cho mỗi đơn hàng)
+        const shippingPrice = 11000; // Giá ship là 11,000 VND cho mỗi đơn hàng
+
+        // Trả về đối tượng mới chứa thông tin về đơn hàng và các orderDetails kèm theo tổng giá của từng orderDetails và tiền ship
         return {
           order: {
             _id: order._id,
@@ -1960,13 +1963,15 @@ module.exports = {
             employee: order.employee,
           },
           orderDetails: orderDetailsWithTotalPrice,
-          totalOrderPrice: totalOrderPrice, // Tổng tiền của đơn hàng
+          totalOrderPrice: totalOrderPrice, // Tổng tiền của đơn hàng (không bao gồm tiền ship)
+          shippingPrice: shippingPrice, // Tiền ship cho đơn hàng
+          totalOrderPriceWithShipping: totalOrderPrice + shippingPrice, // Tổng tiền của đơn hàng kèm theo tiền ship
         };
       });
 
-      // Tính tổng thu nhập từ tất cả các đơn hàng
+      // Tính tổng thu nhập từ tất cả các đơn hàng 
       const totalIncome = ordersWithTotalPrice.reduce(
-        (total, order) => total + order.totalOrderPrice,
+        (total, order) => total + order.totalOrderPriceWithShipping,
         0
       );
 
@@ -2206,6 +2211,9 @@ module.exports = {
           }
         );
 
+        // Tính tiền ship cho đơn hàng (chỉ tính một lần cho mỗi đơn hàng)
+      const shippingPrice = 11000; // Giá ship là 11,000 VND cho mỗi đơn hàng
+
         // Trả về đối tượng mới chứa thông tin về đơn hàng và các orderDetails kèm theo tổng giá của từng orderDetails
         return {
           order: {
@@ -2218,7 +2226,8 @@ module.exports = {
             employee: order.employee,
           },
           orderDetails: orderDetailsWithTotalPrice,
-          totalOrderPrice: totalOrderPrice, // Tổng tiền của đơn hàng
+          shippingPrice: shippingPrice, // Tiền ship cho đơn hàng
+          totalOrderPrice: totalOrderPrice + shippingPrice, // Tổng tiền của đơn hàng
         };
       });
 
@@ -2358,15 +2367,15 @@ module.exports = {
           $lte: new Date(), // Ngày tạo phải nhỏ hơn hoặc bằng ngày hiện tại (đến cuối ngày)
         },
       };
-  
+
       // Đếm số lượng khách hàng mới
       const totalCustomer = await Customer.countDocuments(conditionFind);
-  
+
       // Lấy thông tin của khách hàng mới và chỉ lấy những trường cần thiết
       const newCustomer = await Customer.find(conditionFind)
         .select("firstName lastName address birthday phoneNumber")
         .lean();
-  
+
       return res.send({
         code: 200,
         message: "Tổng số khách hàng mới trong 1 tuần gần nhất",
@@ -2378,43 +2387,48 @@ module.exports = {
     }
   },
 
-  // Hàm tính toán doanh thu theo từng ngày trong tuần cho các đơn hàng hoàn thành (COMPLETED)
+  // Hàm tính toán doanh thu theo từng ngày trong tuần cho các đơn hàng hoàn thành (COMPLETED) discount , phí ship 11k
   calculateRevenueInAWeek: async (req, res, next) => {
     try {
-      const startDate = new Date(); // Lấy ngày hiện tại
-      startDate.setDate(startDate.getDate() - 7); // Lấy ngày 7 ngày trước ngày hiện tại
-      const endDate = new Date(); // Ngày hiện tại
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7);
+      const endDate = new Date();
   
       const conditionFind = {
-        createdDate: { $gte: startDate, $lte: endDate }, // Lọc các đơn hàng có ngày tạo trong khoảng thời gian từ startDate đến endDate
-        status: 'COMPLETED', // Lọc các đơn hàng có trạng thái COMPLETED
+        createdDate: { $gte: startDate, $lte: endDate },
+        status: "COMPLETED",
       };
   
-      // Sử dụng Aggregation Framework để tính toán doanh thu theo từng ngày trong tuần
       const revenueByDay = await Order.aggregate([
-        { $match: conditionFind }, // Lọc các đơn hàng thỏa điều kiện
-        { $unwind: '$orderDetails' }, // Tách các phần tử trong mảng orderDetails thành từng bản ghi riêng lẻ
+        { $match: conditionFind },
+        { $unwind: "$orderDetails" },
         {
           $group: {
-            _id: { $dayOfWeek: '$createdDate' }, // Nhóm các đơn hàng theo ngày trong tuần sử dụng $dayOfWeek
-            totalRevenue: { $sum: "$orderDetails.price" } // Tính tổng doanh thu cho mỗi ngày
-          }
+            _id: { $dayOfWeek: "$createdDate" },
+            totalRevenue: {
+              $sum: {
+                $add: [
+                  { $multiply: ["$orderDetails.price", "$orderDetails.quantity"] }, // Tính tổng doanh thu của mỗi sản phẩm trong đơn hàng
+                  11000, // Phí ship 11k
+                  { $multiply: ["$discount", { $divide: ["$orderDetails.price", 100] }] }, // Tính giảm giá dựa vào discount
+                ]
+              }
+            }
+          },
         },
         {
           $project: {
-            dayOfWeek: '$_id', // Đổi tên trường _id thành dayOfWeek
-            totalRevenue: 1 // Bao gồm trường totalRevenue
-          }
-        }
+            dayOfWeek: "$_id",
+            totalRevenue: 1,
+          },
+        },
       ]);
   
-      // Tạo một mảng để lưu trữ doanh thu cho mỗi ngày trong tuần (Chủ Nhật đến Thứ Bảy)
       const revenueByDayOfWeek = new Array(7).fill(0);
       revenueByDay.forEach((item) => {
         revenueByDayOfWeek[item.dayOfWeek - 1] = item.totalRevenue;
       });
   
-      // Trả về kết quả dưới dạng JSON
       return res.send({
         code: 200,
         revenueByDayOfWeek: revenueByDayOfWeek,
@@ -2423,5 +2437,4 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
-
 };
