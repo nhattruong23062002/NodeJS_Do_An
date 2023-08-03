@@ -20,6 +20,7 @@ const {
   remove,
   update,
   forgotPassword,
+  updateProfileController,
 } = require('./controller');
 const allowRoles = require('../../../middle-wares/checkRole');
 
@@ -44,6 +45,7 @@ router.route('/refresh-token')
 
 router.route('/profile') // Đối tượng cần kiểm tra là token có hợp lệ hay không
   .get(passport.authenticate('jwtAdmin', { session: false }), getMe)
+  .put(passport.authenticate('jwtAdmin', { session: false }), updateProfileController)
 
 router.route('/')
   .get(
