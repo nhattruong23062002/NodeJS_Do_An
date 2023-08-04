@@ -47,7 +47,23 @@ const {
   productlist,
   productSearch,
   productSimilar,
-  filterCategory
+  filterCategory,
+  totalstaff,
+  grossproduct,
+  totalorder,
+  canceledorder,
+  outstock,
+  countNewEmployees,
+  outstock1,
+  bestsellerlist,
+  totalsupplier,
+  CompletedOrders,
+  listorders,
+  totalcustomer,
+  grossprcate,
+  getTop5Customers,
+  countNewCustomer,
+  calculateRevenueInAWeek,
 } = require('./controller');
 
 router.get('/1', question1);
@@ -92,10 +108,22 @@ router.get('/productSearch', productSearch);
 router.get('/productSearch', productSearch);
 router.get('/productSimilar', productSimilar);
 router.get('/filterCategory', filterCategory);
-
-
-
-
+router.get('/totalstaff', totalstaff);
+router.get('/grossproduct', grossproduct);
+router.get('/totalorder', totalorder);
+router.get('/canceledorder', canceledorder);
+router.get('/outstock', outstock);
+router.get('/countNewEmployees', countNewEmployees);
+router.get('/outstock1', outstock1);
+router.get('/bestsellerlist', bestsellerlist);
+router.get('/totalsupplier', totalsupplier);
+router.get('/CompletedOrders', CompletedOrders);
+router.get('/listorders', listorders);
+router.get('/totalcustomer', totalcustomer);
+router.get('/grossprcate', grossprcate);
+router.get('/getTop5Customers', getTop5Customers);
+router.get('/countNewCustomer', countNewCustomer);
+router.get('/calculateRevenueInAWeek', calculateRevenueInAWeek);
 
 
 

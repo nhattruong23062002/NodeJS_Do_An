@@ -81,7 +81,7 @@ const orderSchema = new Schema(
       // validate: {
       //   validator: (value) => {
       //     if (['WAITING', 'COMPLETED', 'CANCELED'].includes(value)) {
-      //       return true;
+      //       return true;conditionFind
       //     }
       //     return false;
       //   },

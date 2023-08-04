@@ -130,6 +130,9 @@ module.exports = {
        // Thêm header Cache-Control vào phản hồi
        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
 
+      // Thêm header Cache-Control vào phản hồi
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+
       return res.send({ code: 200, payload: results });
     } catch (err) {
       return res.status(500).json({ code: 500, error: err });
@@ -203,7 +206,7 @@ module.exports = {
       let found = await Employee.findByIdAndDelete(id);
 
       if (found) {
-        return res.send({ code: 200, payload: found, message: 'Xóa thành công' });
+        return res.send({ code: 200, success: true, payload: found, message: 'Xóa thành công' });
       }
 
       return res.status(410).send({ code: 404, message: 'Không tìm thấy' });
@@ -246,6 +249,7 @@ module.exports = {
       if (found) {
         return res.send({
           code: 200,
+          success: true,
           message: 'Cập nhật thành công',
           payload: found,
         });
@@ -253,7 +257,40 @@ module.exports = {
 
       return res.status(404).send({ code: 404, message: 'Không tìm thấy' });
     } catch (error) {
-      return res.status(500).json({ code: 500, error: err });
+      return res.status(500).json({ code: 500, error: error });
     }
   },
+ updateProfileController:async function (req,res) {
+    try {
+      const {firstName,lastName,email,password,address,phoneNumber} = req.body;
+      const employee = await Employee.findById(req.params._id)
+      //password
+      if(password && password.length <6){
+        return res.json({error: 'Password is required and 6 character long'})
+      };
+      const hashedPassword = password ? await hashPassword(password) : undefined;
+      const updatedUser = await Employee.findByIdAndUpdate(req.user._id,{
+        firstName: firstName || employee.firstName,
+        lastName: lastName || employee.lastName,
+        password: hashedPassword || employee.password,
+        phoneNumber: phoneNumber || employee.phone,
+        address: address || employee.address,
+      },{new:true});
+      res.status(200).send(
+        {
+          success: true,
+          message: 'Profile updated successfuly',
+          updatedUser,
+        }
+      );
+    } catch (error) {
+      console.log(error);
+      res.status(400).send({
+        success: false,
+        message: 'Error while update profile',
+        error
+      })
+    }
+  },
+  
 };
