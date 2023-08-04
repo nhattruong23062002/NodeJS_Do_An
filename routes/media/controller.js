@@ -46,7 +46,7 @@ module.exports = {
         const customerId = req.user._id;
 
         console.log('««««« req.user »»»»»', req.user);
-        const imageUrl = `public/uploads/media/${name}`;
+        const imageUrl = `uploads/media/file/${name}`;
 
         await updateCustomerAvatarUrl(customerId, imageUrl);
 

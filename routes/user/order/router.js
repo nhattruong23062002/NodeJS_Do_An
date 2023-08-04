@@ -23,7 +23,7 @@ router.route('/')
 
 router.route('/:id')
   .get(validateSchema(getDetailSchema), getDetail)
-  .patch(validateSchema(createSchema), update)
+  .patch(update)
   .delete(validateSchema(getDetailSchema), remove)
 
 module.exports = router;
