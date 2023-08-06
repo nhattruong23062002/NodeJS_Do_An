@@ -106,7 +106,7 @@ module.exports = {
       const { id } = req.params;
       const updateData = req.body;
 
-      const { customerId, employeeId, orderDetails } = updateData;
+      /* const { customerId, employeeId, orderDetails } = updateData;
 
       const getCustomer = Customer.findById(customerId);
       const getEmployee = Employee.findById(employeeId);
@@ -135,7 +135,7 @@ module.exports = {
           message: 'Lỗi',
           errors,
         });
-      }
+      } */
 
       const found = await Order.findByIdAndUpdate(id, updateData, {
         new: true,
