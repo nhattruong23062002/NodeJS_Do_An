@@ -2385,18 +2385,23 @@ module.exports = {
   // Hàm tính tổng doanh thu theo từng ngày trong tuần hiện tại cho các đơn hàng hoàn thành (COMPLETED) discount , phí ship 11k
   calculateRevenueInAWeek: async (req, res, next) => {
     try {
+      // Lấy ngày hiện tại
       const currentDate = new Date();
+      
+      // Tìm ngày đầu tiên của tuần (Chủ Nhật trong tuần)
       const firstDayOfWeek = new Date(currentDate);
-      firstDayOfWeek.setDate(currentDate.getDate() - currentDate.getDay()); // Đưa ngày về ngày đầu tiên của tuần
+      firstDayOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
   
-      const startDate = firstDayOfWeek;
-      const endDate = currentDate;
+      const startDate = firstDayOfWeek; // Ngày đầu tiên của tuần
+      const endDate = currentDate; // Ngày hiện tại
   
+      // Điều kiện tìm kiếm cho các đơn hàng đã hoàn thành trong khoảng thời gian tuần
       const conditionFind = {
         createdDate: { $gte: startDate, $lte: endDate },
         status: "COMPLETED",
       };
   
+      // Tìm tất cả các đơn hàng đã hoàn thành trong khoảng thời gian tuần
       const completedOrders = await Order.find(conditionFind)
         .populate("customer", "firstName lastName")
         .populate("employee", "firstName lastName")
@@ -2409,7 +2414,10 @@ module.exports = {
   
       const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   
+      // Tạo đối tượng để lưu trữ thông tin doanh thu hàng ngày trong tuần
       const revenueByDay = {};
+  
+      // Tính toán thông tin doanh thu và gán cho mỗi ngày trong tuần
       completedOrders.forEach((order) => {
         const createdDate = new Date(order.createdDate);
         const dateString = createdDate.toISOString().split('T')[0];
@@ -2436,12 +2444,13 @@ module.exports = {
         revenueByDay[dateString].orderIds.push(order._id);
       });
   
+      // Tính tổng doanh thu từ tất cả các ngày trong tuần
       const totalIncome = Object.values(revenueByDay).reduce((total, revenue) => total + revenue.totalRevenue, 0);
   
-      // Tạo đối tượng để lưu trữ doanh thu hàng tuần
+      // Tạo đối tượng để lưu trữ thông tin doanh thu hàng tuần
       const weeklyRevenue = [];
-    
-      // Lặp qua từng ngày trong tuần và lấy thông tin doanh thu tương ứng
+  
+      // Lặp qua từng ngày trong tuần để tính toán doanh thu hàng tuần
       for (let i = 0; i < 7; i++) {
         const currentDate = new Date(startDate);
         currentDate.setDate(startDate.getDate() + i);
@@ -2463,16 +2472,18 @@ module.exports = {
         });
       }
   
+      // Trả về kết quả trong phản hồi
       return res.send({
         code: 200,
         totalIncome: totalIncome,
-        // revenueByDay: revenueByDay,
-        weeklyRevenue: weeklyRevenue,
+        weeklyRevenue: weeklyRevenue, // Thông tin doanh thu hàng tuần
       });
     } catch (err) {
+      // Xử lý lỗi nếu có
       return res.status(500).json({ code: 500, error: err });
     }
   },
+  
   
   
   
