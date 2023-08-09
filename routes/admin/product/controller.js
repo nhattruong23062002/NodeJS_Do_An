@@ -1,4 +1,6 @@
-
+const { getQueryDateTime } = require("../../../utils");
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 const { Product, Category, Supplier } = require('../../../models');
 
 module.exports = {
@@ -177,19 +179,30 @@ module.exports = {
         res.status(200).json({ message: 'Cập nhật thành công',success: true, payload: result });
       } catch (error) {
         res.status(500).json({ error: 'Đã xảy ra lỗi trong quá trình cập nhật' });
-   }}
-  // updateIsDelete: async function (req, res, next) {
-  // try {
-  //   const {selectedIds} = req.params.id; // Chuyển đổi chuỗi các ID thành mảng các ID
-  //     const products = await Product.updateMany(
-  //       { _id: { $in: selectedIds } }, // Tìm các sản phẩm có ID trong danh sách
-  //       { $set: { isDelete: true } } // Cập nhật trường isDelete thành true
-  //     );
-
-  //     return res.status(200).json({ success: true, count: products.nModified });
-  //   } catch (error) {
-  //     console.error(error);
-  //     return res.status(500).json({ message: 'Server error' });
-  //   }
-  // },
+   }},
+   productSearch: async (req, res, next) => {
+    try {
+      const { name } = req.query;
+      const conditionFind = {
+        name: { $regex: new RegExp(`${name}`), $options: "i" },
+      };
+      let results = await Product.find(conditionFind)
+        .populate({
+          path: "category",
+          select: "name", // Chỉ lấy trường "name" từ bảng "category"
+        })
+        .populate("supplier");
+  
+      // Đối chiếu mã danh mục và hiển thị tên danh mục
+      results = results.map((product) => {
+        const categoryName = product.category ? product.category.name : "";
+        return { ...product._doc, categoryName };
+      });
+  
+      return res.send({ code: 200, payload: results });
+    } catch (err) {
+      console.log("««««« err »»»»»", err);
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
 };

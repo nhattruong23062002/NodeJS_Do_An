@@ -18,6 +18,10 @@ const categorySchema = new Schema(
       default: false,
       required: true,
     },
+    photo: {
+      type: String,
+      require: true,
+    },
   },
   {
     versionKey: false,

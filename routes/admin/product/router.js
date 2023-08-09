@@ -13,6 +13,7 @@ const {
   deleteProduct,
   updateProduct,
   updateIsDelete,
+  productSearch,
 } = require('./controller');
 
 router.route('/')
@@ -24,6 +25,7 @@ router.route('/:id')
   .patch(validateSchema(createProductSchema), updateProduct)
   .delete(validateSchema(getProductSchema), deleteProduct)
 router.route('/delete').post(updateIsDelete)
+router.route('/productSearch').get(productSearch);
 // GET ALL
 // router.get('/', getProductAll);
 
