@@ -76,7 +76,12 @@ const employeeSchema = new Schema(
     question: {
       type: String,
       required: true,
-    }
+    },
+    isDelete: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
   },
   {
     timestamps: true, // Sẽ tự động tạo trường createdAt và updatedAt

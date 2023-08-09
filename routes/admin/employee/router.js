@@ -21,6 +21,7 @@ const {
   update,
   forgotPassword,
   updateProfileController,
+  updateIsDelete,
 } = require('./controller');
 const allowRoles = require('../../../middle-wares/checkRole');
 
@@ -64,5 +65,6 @@ router.route('/:id')
     validateSchema(getDetailSchema), // CHECK PARAMS
     remove, // HANDLE DELETE
   )
+  router.route('/delete').post(updateIsDelete) 
 
 module.exports = router;

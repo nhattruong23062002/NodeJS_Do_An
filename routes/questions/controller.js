@@ -2483,7 +2483,31 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+  productSearchb: async (req, res, next) => {
+    try {
+      const { name } = req.query;
+      const conditionFind = {
+        name: { $regex: new RegExp(`${name}`), $options: "i" },
+      };
+      let results = await Product.find(conditionFind)
+        .populate({
+          path: "category",
+          select: "name", // Chỉ lấy trường "name" từ bảng "category"
+        })
+        .populate("supplier");
   
+      // Đối chiếu mã danh mục và hiển thị tên danh mục
+      results = results.map((product) => {
+        const category = product.category ? product.category.name : "";
+        return { ...product._doc, category };
+      });
+  
+      return res.send({ code: 200, payload: results });
+    } catch (err) {
+      console.log("««««« err »»»»»", err);
+      return res.status(500).json({ code: 500, error: err });
+    }
+  },
   
   
   

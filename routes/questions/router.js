@@ -64,6 +64,7 @@ const {
   getTop5Customers,
   countNewCustomer,
   calculateRevenueInAWeek,
+  productSearchb,
 } = require('./controller');
 
 router.get('/1', question1);
@@ -105,7 +106,6 @@ router.get('/flashsale', flashsale);
 router.get('/bestseller', bestseller);
 router.get('/productlist', productlist);
 router.get('/productSearch', productSearch);
-router.get('/productSearch', productSearch);
 router.get('/productSimilar', productSimilar);
 router.get('/filterCategory', filterCategory);
 router.get('/totalstaff', totalstaff);
@@ -124,7 +124,7 @@ router.get('/grossprcate', grossprcate);
 router.get('/getTop5Customers', getTop5Customers);
 router.get('/countNewCustomer', countNewCustomer);
 router.get('/calculateRevenueInAWeek', calculateRevenueInAWeek);
-
+router.get('/productSearchb', productSearchb);
 
 
 module.exports = router;
