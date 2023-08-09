@@ -149,21 +149,47 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
-  updateIsDelete: async function (req, res, next) {
-    try {
-      const product = await Product.findById(req.params.id);
-      if (!product) {
-        return res.status(404).json({ message: 'Product not found' });
-      }
+   updateIsDelete: async function (req, res, next) {
+    // try {
+    //    const product = await Product.findById(req.params.id);
+    //    if (!product) {
+    //      return res.status(404).json({ message: 'Product not found' });
+    //    }
   
-      product.isDelete = true; // Cập nhật trường isDelete thành true
+    //    product.isDelete = true; // Cập nhật trường isDelete thành true
   
-      await product.save(); // Lưu thay đổi vào database
+    //    await product.save(); // Lưu thay đổi vào database
   
-      return res.status(200).send({code: 200,success:true,payload:product}); // Trả về sản phẩm đã được cập nhật
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Server error' });
-    }
-  },
+    //   return res.status(200).send({code: 200,success:true,payload:product}); // Trả về sản phẩm đã được cập nhật
+    //  } catch (error) {
+    //    console.error(error);
+    //    return res.status(500).json({ message: 'Server error' });
+    //  
+    const { selectedIds } = req.body; // Lấy danh sách các ID từ yêu cầu
+
+      try {
+        // Thực hiện cập nhật cho từng ID trong danh sách
+        const result = await Product.updateMany(
+          { _id: { $in: selectedIds } }, // Tìm các sản phẩm có ID trong danh sách
+          { $set: { isDelete: true } } // Cập nhật trường isDelete thành true
+        );
+
+        res.status(200).json({ message: 'Cập nhật thành công',success: true, payload: result });
+      } catch (error) {
+        res.status(500).json({ error: 'Đã xảy ra lỗi trong quá trình cập nhật' });
+   }}
+  // updateIsDelete: async function (req, res, next) {
+  // try {
+  //   const {selectedIds} = req.params.id; // Chuyển đổi chuỗi các ID thành mảng các ID
+  //     const products = await Product.updateMany(
+  //       { _id: { $in: selectedIds } }, // Tìm các sản phẩm có ID trong danh sách
+  //       { $set: { isDelete: true } } // Cập nhật trường isDelete thành true
+  //     );
+
+  //     return res.status(200).json({ success: true, count: products.nModified });
+  //   } catch (error) {
+  //     console.error(error);
+  //     return res.status(500).json({ message: 'Server error' });
+  //   }
+  // },
 };
