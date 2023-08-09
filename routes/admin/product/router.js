@@ -23,7 +23,7 @@ router.route('/:id')
   .get(validateSchema(getProductSchema), getProductDetail)
   .patch(validateSchema(createProductSchema), updateProduct)
   .delete(validateSchema(getProductSchema), deleteProduct)
-router.route('/:id/delete').post(validateSchema(getProductSchema),updateIsDelete)
+router.route('/delete').post(updateIsDelete)
 // GET ALL
 // router.get('/', getProductAll);
 
