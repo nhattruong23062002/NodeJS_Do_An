@@ -2382,54 +2382,99 @@ module.exports = {
     }
   },
 
-  // Hàm tính tổng doanh thu theo từng ngày trong tuần gần nhất cho các đơn hàng hoàn thành (COMPLETED) discount , phí ship 11k
+  // Hàm tính tổng doanh thu theo từng ngày trong tuần hiện tại cho các đơn hàng hoàn thành (COMPLETED) discount , phí ship 11k
   calculateRevenueInAWeek: async (req, res, next) => {
     try {
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 7);
-      const endDate = new Date();
+      const currentDate = new Date();
+      const firstDayOfWeek = new Date(currentDate);
+      firstDayOfWeek.setDate(currentDate.getDate() - currentDate.getDay()); // Đưa ngày về ngày đầu tiên của tuần
+  
+      const startDate = firstDayOfWeek;
+      const endDate = currentDate;
   
       const conditionFind = {
         createdDate: { $gte: startDate, $lte: endDate },
         status: "COMPLETED",
       };
   
-      const revenueByDay = await Order.aggregate([
-        { $match: conditionFind },
-        { $unwind: "$orderDetails" },
-        {
-          $group: {
-            _id: { $dayOfWeek: "$createdDate" },
-            totalRevenue: {
-              $sum: {
-                $add: [
-                  { $multiply: ["$orderDetails.price", "$orderDetails.quantity"] }, // Tính tổng doanh thu của mỗi sản phẩm trong đơn hàng
-                  11000, // Phí ship 11k
-                  { $multiply: ["$discount", { $divide: ["$orderDetails.price", 100] }] }, // Tính giảm giá dựa vào discount
-                ]
-              }
-            }
-          },
-        },
-        {
-          $project: {
-            dayOfWeek: "$_id",
-            totalRevenue: 1,
-          },
-        },
-      ]);
+      const completedOrders = await Order.find(conditionFind)
+        .populate("customer", "firstName lastName")
+        .populate("employee", "firstName lastName")
+        .populate({
+          path: "orderDetails.product",
+          model: "Product",
+          select: "name price _id discount",
+        })
+        .lean();
   
-      const revenueByDayOfWeek = new Array(7).fill(0);
-      revenueByDay.forEach((item) => {
-        revenueByDayOfWeek[item.dayOfWeek - 1] = item.totalRevenue;
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  
+      const revenueByDay = {};
+      completedOrders.forEach((order) => {
+        const createdDate = new Date(order.createdDate);
+        const dateString = createdDate.toISOString().split('T')[0];
+  
+        if (!revenueByDay[dateString]) {
+          revenueByDay[dateString] = {
+            totalRevenue: 0,
+            orderIds: [],
+            dayOfWeekName: dayNames[createdDate.getDay()],
+          };
+        }
+  
+        const totalOrderPrice = order.orderDetails.reduce((total, orderDetails) => {
+          const totalOrderDetailPrice = orderDetails.price * orderDetails.quantity;
+          return total + totalOrderDetailPrice;
+        }, 0);
+  
+        const shippingPrice = 11000;
+        const discountedTotalOrderPrice = order.discount
+          ? totalOrderPrice * (1 - order.discount / 100)
+          : totalOrderPrice;
+  
+        revenueByDay[dateString].totalRevenue += discountedTotalOrderPrice + shippingPrice;
+        revenueByDay[dateString].orderIds.push(order._id);
       });
+  
+      const totalIncome = Object.values(revenueByDay).reduce((total, revenue) => total + revenue.totalRevenue, 0);
+  
+      // Tạo đối tượng để lưu trữ doanh thu hàng tuần
+      const weeklyRevenue = [];
+    
+      // Lặp qua từng ngày trong tuần và lấy thông tin doanh thu tương ứng
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
+  
+        const dateString = currentDate.toISOString().split('T')[0];
+        const dayOfWeekName = dayNames[currentDate.getDay()];
+  
+        const dailyRevenue = revenueByDay[dateString] || {
+          totalRevenue: 0,
+          orderIds: [],
+          dayOfWeekName: dayOfWeekName,
+        };
+  
+        weeklyRevenue.push({
+          date: dateString,
+          dayOfWeek: dayOfWeekName,
+          totalRevenue: dailyRevenue.totalRevenue,
+          orderIds: dailyRevenue.orderIds,
+        });
+      }
   
       return res.send({
         code: 200,
-        revenueByDayOfWeek: revenueByDayOfWeek,
+        totalIncome: totalIncome,
+        // revenueByDay: revenueByDay,
+        weeklyRevenue: weeklyRevenue,
       });
     } catch (err) {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+  
+  
+  
+  
 };
