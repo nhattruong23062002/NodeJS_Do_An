@@ -1904,74 +1904,71 @@ module.exports = {
 
       // Thực hiện truy vấn để lấy các đơn hàng thỏa điều kiện
       const completedOrders = await Order.find(conditionFind)
-        .populate("customer", "firstName lastName") // Lấy thông tin của khách hàng (chỉ lấy tên)
-        .populate("employee", "firstName lastName") // Lấy thông tin của nhân viên (chỉ lấy tên)
+        .populate("customer", "firstName lastName")
+        .populate("employee", "firstName lastName")
         .populate({
           path: "orderDetails.product",
           model: "Product",
-          select: "name price _id", // Lấy thông tin của sản phẩm
+          select: "name price _id discount",
         })
-        .lean(); // Chuyển kết quả từ đối tượng Mongoose sang đối tượng JavaScript thông thường
+        .lean();
 
       // Tạo một mảng mới chứa thông tin về đơn hàng và các orderDetails cùng với tổng giá của từng orderDetails
       const ordersWithTotalPrice = completedOrders.map((order) => {
         // Tính tổng tiền của tất cả các orderDetail trong đơn hàng
         let totalOrderPrice = 0;
         const orderDetailsWithTotalPrice = order.orderDetails.map(
-          (orderDetail) => {
+          (orderDetails) => {
             const totalOrderDetailPrice =
-              orderDetail.product.price * orderDetail.quantity;
-            
-            // Kiểm tra xem có giảm giá cho orderDetail này không và tính tổng giá sau giảm giá nếu có
-            if (order.discount) {
-              const discountedTotalOrderDetailPrice =
-                totalOrderDetailPrice * (1 - order.discount / 100);
-              totalOrderPrice += discountedTotalOrderDetailPrice;
-              return {
-                productId: orderDetail.product._id, // Lấy _id của sản phẩm
-                productName: orderDetail.product.name,
-                productPrice: orderDetail.product.price,
-                quantity: orderDetail.quantity,
-                discount: order.discount,
-                totalOrderDetailPrice: discountedTotalOrderDetailPrice,
-              };
-            } else {
-              totalOrderPrice += totalOrderDetailPrice;
-              return {
-                productId: orderDetail.product._id, // Lấy _id của sản phẩm
-                productName: orderDetail.product.name,
-                productPrice: orderDetail.product.price,
-                quantity: orderDetail.quantity,
-                totalOrderDetailPrice: totalOrderDetailPrice,
-              };
-            }
+              orderDetails.price * orderDetails.quantity;
+
+            return {
+              productId: orderDetails.product._id,
+              productName: orderDetails.product.name,
+              productPrice: orderDetails.product.price,
+              quantity: orderDetails.quantity,
+              productDiscount: orderDetails.product.discount,
+              totalOrderDetailPrice: totalOrderDetailPrice,
+            };
           }
         );
 
-        // Tính tiền ship cho đơn hàng (chỉ tính một lần cho mỗi đơn hàng)
-        const shippingPrice = 11000; // Giá ship là 11,000 VND cho mỗi đơn hàng
+        // Tính tổng thu nhập của cả các đơn hàng
+        const totalOrder = orderDetailsWithTotalPrice.reduce(
+          (total, order) => total + order.totalOrderDetailPrice,
+          0
+        );
 
-        // Trả về đối tượng mới chứa thông tin về đơn hàng và các orderDetails kèm theo tổng giá của từng orderDetails và tiền ship
+        // Tính tiền ship cho đơn hàng (chỉ tính một lần cho mỗi đơn hàng)
+        const shippingPrice = 11000;
+
+        // Áp dụng giảm giá cho tổng đơn hàng nếu có
+        let discountedTotalOrderPrice = totalOrder;
+        if (order.discount) {
+          discountedTotalOrderPrice = totalOrder * (1 - order.discount / 100);
+        }
+
         return {
           order: {
             _id: order._id,
             createdDate: order.createdDate,
             paymentType: order.paymentType,
             status: order.status,
+            discount: order.discount,
             shippingAddress: order.shippingAddress,
             customer: order.customer,
             employee: order.employee,
           },
           orderDetails: orderDetailsWithTotalPrice,
-          totalOrderPrice: totalOrderPrice, // Tổng tiền của đơn hàng (không bao gồm tiền ship)
-          shippingPrice: shippingPrice, // Tiền ship cho đơn hàng
-          totalOrderPriceWithShipping: totalOrderPrice + shippingPrice, // Tổng tiền của đơn hàng kèm theo tiền ship
+          totalamountdiscount: discountedTotalOrderPrice,
+          shippingPrice: shippingPrice,
+          totalOrderPrice: discountedTotalOrderPrice + shippingPrice,
         };
       });
 
-      // Tính tổng thu nhập từ tất cả các đơn hàng 
+      // Tính tổng thu nhập từ tất cả các đơn hàng
       const totalIncome = ordersWithTotalPrice.reduce(
-        (total, order) => total + order.totalOrderPriceWithShipping,
+        (total, order) => total + order.totalOrderPrice,
         0
       );
 
@@ -2160,74 +2157,72 @@ module.exports = {
     }
   },
 
-  //Hiển thỉ ra danh sách tính ổng thu nhập dự trên price, discount, quantity, status có tên nhân viên, khách hàng
+  //Hiển thỉ ra danh sách tính tổng thu nhập dự trên price, discount, quantity, status có tên nhân viên, khách hàng
   listorders: async (req, res, next) => {
     try {
       const conditionFind = {};
 
       // Thực hiện truy vấn để lấy các đơn hàng thỏa điều kiện
       const completedOrders = await Order.find(conditionFind)
-        .populate("customer", "firstName lastName") // Lấy thông tin của khách hàng (chỉ lấy tên)
-        .populate("employee", "firstName lastName") // Lấy thông tin của nhân viên (chỉ lấy tên)
+        .populate("customer", "firstName lastName")
+        .populate("employee", "firstName lastName")
         .populate({
           path: "orderDetails.product",
           model: "Product",
-          select: "name price _id", // Lấy thông tin của sản phẩm
+          select: "name price _id discount",
         })
-        .lean(); // Chuyển kết quả từ đối tượng Mongoose sang đối tượng JavaScript thông thường
+        .lean();
 
       // Tạo một mảng mới chứa thông tin về đơn hàng và các orderDetails cùng với tổng giá của từng orderDetails
       const ordersWithTotalPrice = completedOrders.map((order) => {
         // Tính tổng tiền của tất cả các orderDetail trong đơn hàng
         let totalOrderPrice = 0;
         const orderDetailsWithTotalPrice = order.orderDetails.map(
-          (orderDetail) => {
+          (orderDetails) => {
             const totalOrderDetailPrice =
-              orderDetail.product.price * orderDetail.quantity;
+              orderDetails.price * orderDetails.quantity;
 
-            // Kiểm tra xem có giảm giá cho orderDetail này không và tính tổng giá sau giảm giá nếu có
-            if (order.discount) {
-              const discountedTotalOrderDetailPrice =
-                totalOrderDetailPrice * (1 - order.discount / 100);
-              totalOrderPrice += discountedTotalOrderDetailPrice;
-              return {
-                productId: orderDetail.product._id, // Lấy _id của sản phẩm
-                productName: orderDetail.product.name,
-                productPrice: orderDetail.product.price,
-                quantity: orderDetail.quantity,
-                discount: order.discount,
-                totalOrderDetailPrice: discountedTotalOrderDetailPrice,
-              };
-            } else {
-              totalOrderPrice += totalOrderDetailPrice;
-              return {
-                productId: orderDetail.product._id, // Lấy _id của sản phẩm
-                productName: orderDetail.product.name,
-                productPrice: orderDetail.product.price,
-                quantity: orderDetail.quantity,
-                totalOrderDetailPrice: totalOrderDetailPrice,
-              };
-            }
+            return {
+              productId: orderDetails.product._id,
+              productName: orderDetails.product.name,
+              productPrice: orderDetails.product.price,
+              quantity: orderDetails.quantity,
+              productDiscount: orderDetails.product.discount,
+              totalOrderDetailPrice: totalOrderDetailPrice,
+            };
           }
         );
 
-        // Tính tiền ship cho đơn hàng (chỉ tính một lần cho mỗi đơn hàng)
-      const shippingPrice = 11000; // Giá ship là 11,000 VND cho mỗi đơn hàng
+        // Tính tổng thu nhập của cả các đơn hàng
+        const totalOrder = orderDetailsWithTotalPrice.reduce(
+          (total, order) => total + order.totalOrderDetailPrice,
+          0
+        );
 
-        // Trả về đối tượng mới chứa thông tin về đơn hàng và các orderDetails kèm theo tổng giá của từng orderDetails
+        // Tính tiền ship cho đơn hàng (chỉ tính một lần cho mỗi đơn hàng)
+        const shippingPrice = 11000;
+
+        // Áp dụng giảm giá cho tổng đơn hàng nếu có
+        let discountedTotalOrderPrice = totalOrder;
+        if (order.discount) {
+          discountedTotalOrderPrice = totalOrder * (1 - order.discount / 100);
+        }
+
         return {
           order: {
             _id: order._id,
             createdDate: order.createdDate,
             paymentType: order.paymentType,
             status: order.status,
+            discount: order.discount,
             shippingAddress: order.shippingAddress,
             customer: order.customer,
             employee: order.employee,
           },
           orderDetails: orderDetailsWithTotalPrice,
-          shippingPrice: shippingPrice, // Tiền ship cho đơn hàng
-          totalOrderPrice: totalOrderPrice + shippingPrice, // Tổng tiền của đơn hàng
+          totalamountdiscount: discountedTotalOrderPrice,
+          shippingPrice: shippingPrice,
+          totalOrderPrice: discountedTotalOrderPrice + shippingPrice,
         };
       });
 
@@ -2387,7 +2382,7 @@ module.exports = {
     }
   },
 
-  // Hàm tính toán doanh thu theo từng ngày trong tuần cho các đơn hàng hoàn thành (COMPLETED) discount , phí ship 11k
+  // Hàm tính tổng doanh thu theo từng ngày trong tuần gần nhất cho các đơn hàng hoàn thành (COMPLETED) discount , phí ship 11k
   calculateRevenueInAWeek: async (req, res, next) => {
     try {
       const startDate = new Date();
