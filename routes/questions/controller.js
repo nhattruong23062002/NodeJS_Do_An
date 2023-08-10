@@ -2523,4 +2523,30 @@ module.exports = {
       return res.status(500).json({ code: 500, error: err });
     }
   },
+  // //làm nháp tìm kiếm theo status hiển thị tên khách hàng
+  // filterStatus: async (req, res, next) => {
+  //   try {
+  //     const { status } = req.query;
+  //     const conditionFind = {
+  //       status: { $regex: new RegExp(`${status}`), $options: "i" },
+  //     };
+  //     let results = await Order.find(conditionFind)
+  //       .populate({
+  //         path: "customer",
+  //         select: "firstName lastName", // Chỉ lấy trường "name" từ bảng "category"
+  //       })
+      
+  
+  //     // Đối chiếu mã danh mục và hiển thị tên danh mục
+  //     results = results.map((order) => {
+  //       const customer = order.customer ? `${order.customer.firstName}  ${order.customer.lastName}` : "";
+  //       return { ...order._doc, customer };
+  //     });
+  
+  //     return res.send({ code: 200, payload: results });
+  //   } catch (err) {
+  //     console.log("««««« err »»»»»", err);
+  //     return res.status(500).json({ code: 500, error: err });
+  //   }
+  // }
 };

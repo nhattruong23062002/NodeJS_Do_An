@@ -161,4 +161,18 @@ module.exports = {
       return res.status(500).json({ code: 500, error: error });
     }
   },
+  updateIsDelete: async function (req, res, next) {
+    const { selectedIds } = req.body; // Lấy danh sách các ID từ yêu cầu
+
+      try {
+        // Thực hiện cập nhật cho từng ID trong danh sách
+        const result = await Order.updateMany(
+          { _id: { $in: selectedIds } }, // Tìm các nhân viên có ID trong danh sách
+          { $set: { isDelete: true } } // Cập nhật trường isDelete thành true
+        );
+
+        res.status(200).json({ message: 'Cập nhật thành công',success: true, payload: result });
+      } catch (error) {
+        res.status(500).json({ error: 'Đã xảy ra lỗi trong quá trình cập nhật' });
+   }}
 };
