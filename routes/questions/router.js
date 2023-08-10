@@ -65,6 +65,7 @@ const {
   countNewCustomer,
   calculateRevenueInAWeek,
   productSearchb,
+  employeeSearch,
 } = require('./controller');
 
 router.get('/1', question1);
@@ -125,6 +126,6 @@ router.get('/getTop5Customers', getTop5Customers);
 router.get('/countNewCustomer', countNewCustomer);
 router.get('/calculateRevenueInAWeek', calculateRevenueInAWeek);
 router.get('/productSearchb', productSearchb);
-
+router.get('/employeeSearch', employeeSearch);
 
 module.exports = router;
