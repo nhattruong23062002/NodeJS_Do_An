@@ -1,5 +1,7 @@
 const { Order, Customer, Employee, Product } = require('../../../models');
 const { asyncForEach } = require('../../../utils');
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = {
   getAll: async (req, res, next) => {
@@ -111,7 +113,7 @@ module.exports = {
       const { id } = req.params;
       const updateData = req.body;
 
-      const { customerId, employeeId, orderDetails } = updateData;
+      const { customerId, employeeId} = updateData;
 
       const getCustomer = Customer.findById(customerId);
       const getEmployee = Employee.findById(employeeId);
@@ -127,12 +129,12 @@ module.exports = {
       if (!employee || employee.isDelete)
         errors.push('Nhân viên không tồn tại');
 
-      await asyncForEach(orderDetails, async (item) => {
-        const product = await Product.findById(item.productId);
+      // await asyncForEach(orderDetails, async (item) => {
+      //   const product = await Product.findById(item.productId);
 
-        if (!product)
-          errors.push(`Sản phẩm ${item.productId} không có trong hệ thống`);
-      });
+      //   if (!product)
+      //     errors.push(`Sản phẩm ${item.productId} không có trong hệ thống`);
+      // });
 
       if (errors.length > 0) {
         return res.status(404).json({
@@ -156,7 +158,7 @@ module.exports = {
 
       return res.status(404).send({ code: 404, message: 'Không tìm thấy' });
     } catch (error) {
-      return res.status(500).json({ code: 500, error: err });
+      return res.status(500).json({ code: 500, error: error });
     }
   },
 };

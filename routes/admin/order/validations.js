@@ -58,7 +58,7 @@ module.exports = {
 
       status: yup.string()
         .required()
-        .oneOf(['WAITING', 'COMPLETED', 'CANCELED'], 'Trạng thái không hợp lệ'),
+        .oneOf(['WAITING', 'COMPLETED', 'CANCELED','DELIVERING'], 'Trạng thái không hợp lệ'),
 
       customerId: yup
         .string()
