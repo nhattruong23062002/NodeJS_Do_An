@@ -254,19 +254,17 @@ module.exports = {
     try {
       const data = req.body;
 
-      const { email, phoneNumber, address } = data;
+      const { email, phoneNumber } = data;
 
       const getEmailExits = Customer.find({ email });
       const getPhoneExits = Customer.find({ phoneNumber });
-      const getAddressExits = Customer.find({ address });
 
-      const [foundEmail, foundPhoneNumber, foundAddress] = await Promise.all([getEmailExits, getPhoneExits, getAddressExits]);
+      const [foundEmail, foundPhoneNumber] = await Promise.all([getEmailExits, getPhoneExits]);
 
       const errors = [];
       if (foundEmail && foundEmail.length > 0) errors.push('Email đã tồn tại');
       // if (!isEmpty(foundEmail)) errors.push('Email đã tồn tại');
       if (foundPhoneNumber && foundPhoneNumber.length > 0) errors.push('Số điện thoại đã tồn tại');
-      if (foundAddress && foundAddress.length > 0) errors.push('Địa chỉ đã tồn tại');
 
       if (errors.length > 0) {
         return res.status(404).json({
