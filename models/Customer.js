@@ -61,6 +61,11 @@ const customerSchema = new Schema(
       manLength: [12, 'Mật khẩu phải có tối thiểu 12 kí tự'],
       required: [true, 'Mật khẩu không được bỏ trống'],
     },
+    isDelete: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
     avatarUrl: { type: String }
   },
   {
