@@ -2549,4 +2549,19 @@ module.exports = {
   //     return res.status(500).json({ code: 500, error: err });
   //   }
   // }
+  customerSearch: async (req, res, next) => {
+    try {
+      const { firstName,lastName } = req.query;
+      const conditionFind = {
+        firstName: { $regex: new RegExp(`${firstName}`), $options: "i" },
+        lastName: { $regex: new RegExp(`${lastName}`), $options: "i" }
+      };
+      let results = await Customer.find(conditionFind);
+       
+      return res.send({ code: 200, payload: results });
+    } catch (err) {
+      console.log("««««« err »»»»»", err);
+      return res.status(500).json({ code: 500, error: err });
+    }
+  }
 };
