@@ -7,6 +7,9 @@
 var app = require('../app');
 var debug = require('debug')('nodejs:server');
 var http = require('http');
+const socketIo = require('socket.io');
+const Customer = require('../models/Customer');
+const cors = require('cors');
 
 /**
  * Get port from environment and store in Express.
@@ -19,7 +22,30 @@ app.set('port', port);
  * Create HTTP server.
  */
 
+
 var server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: '*',
+  }
+});
+
+
+io.on('connection', socket => {
+  socket.on('chat', ({ senderId, receiverId, message }) => {
+    console.log('««««« message »»»»»', senderId, receiverId, message );
+    const messageData = {
+      senderId: senderId,
+      receiverId: receiverId,
+      content: message
+    };
+    io.emit('message', messageData); // Gửi tin nhắn cho tất cả người kết nối
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
 
 /**
  * Listen on provided port, on all network interfaces.

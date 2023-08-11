@@ -7,7 +7,6 @@ const cors = require('cors');
 const { default: mongoose } = require('mongoose');
 const passport = require('passport');
 
-
 require('dotenv').config()
 
 const { CONNECTION_STRING } = require('./constants/dbSettings');
@@ -21,6 +20,7 @@ const userRouter = require('./routes/user/routes');
 
 
 const app = express();
+
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
