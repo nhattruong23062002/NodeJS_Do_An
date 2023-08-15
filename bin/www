@@ -8,7 +8,6 @@ var app = require('../app');
 var debug = require('debug')('nodejs:server');
 var http = require('http');
 const socketIo = require('socket.io');
-const Customer = require('../models/Customer');
 const cors = require('cors');
 
 /**
@@ -30,22 +29,44 @@ const io = socketIo(server, {
   }
 });
 
-
+// Server side
 io.on('connection', socket => {
-  socket.on('chat', ({ senderId, receiverId, message }) => {
-    console.log('««««« message »»»»»', senderId, receiverId, message );
+  socket.on('joinRoom', ({ roomId }) => {
+    socket.join(roomId);
+  });
+
+  socket.on('chat', ({ roomId, message }) => {
     const messageData = {
-      senderId: senderId,
-      receiverId: receiverId,
-      content: message
-    };
-    io.emit('message', messageData); // Gửi tin nhắn cho tất cả người kết nối
+      content:message,
+      roomId: roomId
+    }
+    console.log('««««« message »»»»»', message);
+    io.to(roomId).emit('message', messageData);
+  });
+
+  socket.on('on-update', ({ roomId }) => {
+    const updateData = {
+      roomId: roomId
+    }
+    io.emit('update', updateData);
+  });
+
+  socket.on('getRooms', () => {
+    const rooms = socket.adapter.rooms;
+    const roomList = [];
+    for (const room of rooms.keys()) {
+      if (room.includes('-647efdae66502ca93f65d13d')) {
+        roomList.push(room);
+      }
+    }
+    socket.emit('roomList', roomList);
   });
 
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });
 });
+
 
 /**
  * Listen on provided port, on all network interfaces.

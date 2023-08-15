@@ -127,7 +127,7 @@ module.exports = {
         subject: 'Yêu cầu đặt lại mật khẩu',
         html: `
           <p>Xin chào,</p>
-          <p>Bạn đã yêu cầu đặt lại mật khẩu từ Chung_Store.Vui lòng nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:</p>
+          <p>Bạn đã yêu cầu đặt lại mật khẩu từ mỹ phẩm Elysian.Vui lòng nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:</p>
           <p><a href="http://localhost:3000/resetPassword?token=${token}">Đặt lại mật khẩu</a></p>
           <p>Trân trọng,</p>
           <p>Đội ngũ của chúng tôi</p>
