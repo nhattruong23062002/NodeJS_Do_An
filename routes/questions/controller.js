@@ -2208,7 +2208,7 @@ module.exports = {
           discountedTotalOrderPrice = totalOrder * (1 - order.discount / 100);
         }
 
-        return {
+        const orderData = {
           order: {
             _id: order._id,
             createdDate: order.createdDate,
@@ -2224,21 +2224,33 @@ module.exports = {
           shippingPrice: shippingPrice,
           totalOrderPrice: discountedTotalOrderPrice + shippingPrice,
         };
+    
+        return orderData;
+      })
+      .sort((a, b) => {
+        // Sắp xếp đơn hàng, đẩy trạng thái "WAITING" lên đầu danh sách
+        if (a.order.status === "WAITING") {
+          return -1;
+        } else if (b.order.status === "WAITING") {
+          return 1;
+        } else {
+          return 0;
+        }
       });
-
-      // Tính tổng thu nhập từ tất cả các đơn hàng
-      const totalIncome = ordersWithTotalPrice.reduce(
-        (total, order) => total + order.totalOrderPrice,
-        0
-      );
-
-      // Trả về kết quả dưới dạng JSON
-      return res.send({
-        code: 200,
-        totalResult: ordersWithTotalPrice.length,
-        totalIncome: totalIncome,
-        payload: ordersWithTotalPrice,
-      });
+    
+    // Tính tổng thu nhập từ tất cả các đơn hàng
+    const totalIncome = ordersWithTotalPrice.reduce(
+      (total, order) => total + order.totalOrderPrice,
+      0
+    );
+    
+    // Trả về kết quả dưới dạng JSON
+    return res.send({
+      code: 200,
+      totalResult: ordersWithTotalPrice.length,
+      totalIncome: totalIncome,
+      payload: ordersWithTotalPrice,
+    });
     } catch (err) {
       return res.status(500).json({ code: 500, error: err });
     }
@@ -2387,20 +2399,20 @@ module.exports = {
     try {
       // Lấy ngày hiện tại
       const currentDate = new Date();
-      
+
       // Tìm ngày đầu tiên của tuần (Chủ Nhật trong tuần)
       const firstDayOfWeek = new Date(currentDate);
       firstDayOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-  
+
       const startDate = firstDayOfWeek; // Ngày đầu tiên của tuần
       const endDate = currentDate; // Ngày hiện tại
-  
+
       // Điều kiện tìm kiếm cho các đơn hàng đã hoàn thành trong khoảng thời gian tuần
       const conditionFind = {
         createdDate: { $gte: startDate, $lte: endDate },
         status: "COMPLETED",
       };
-  
+
       // Tìm tất cả các đơn hàng đã hoàn thành trong khoảng thời gian tuần
       const completedOrders = await Order.find(conditionFind)
         .populate("customer", "firstName lastName")
@@ -2411,17 +2423,25 @@ module.exports = {
           select: "name price _id discount",
         })
         .lean();
-  
-      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  
+
+      const dayNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+
       // Tạo đối tượng để lưu trữ thông tin doanh thu hàng ngày trong tuần
       const revenueByDay = {};
-  
+
       // Tính toán thông tin doanh thu và gán cho mỗi ngày trong tuần
       completedOrders.forEach((order) => {
         const createdDate = new Date(order.createdDate);
-        const dateString = createdDate.toISOString().split('T')[0];
-  
+        const dateString = createdDate.toISOString().split("T")[0];
+
         if (!revenueByDay[dateString]) {
           revenueByDay[dateString] = {
             totalRevenue: 0,
@@ -2429,41 +2449,49 @@ module.exports = {
             dayOfWeekName: dayNames[createdDate.getDay()],
           };
         }
-  
-        const totalOrderPrice = order.orderDetails.reduce((total, orderDetails) => {
-          const totalOrderDetailPrice = orderDetails.price * orderDetails.quantity;
-          return total + totalOrderDetailPrice;
-        }, 0);
-  
+
+        const totalOrderPrice = order.orderDetails.reduce(
+          (total, orderDetails) => {
+            const totalOrderDetailPrice =
+              orderDetails.price * orderDetails.quantity;
+            return total + totalOrderDetailPrice;
+          },
+          0
+        );
+
         const shippingPrice = 11000;
         const discountedTotalOrderPrice = order.discount
           ? totalOrderPrice * (1 - order.discount / 100)
           : totalOrderPrice;
-  
-        revenueByDay[dateString].totalRevenue += discountedTotalOrderPrice + shippingPrice;
+
+        revenueByDay[dateString].totalRevenue +=
+          discountedTotalOrderPrice + shippingPrice;
         revenueByDay[dateString].orderIds.push(order._id);
       });
-  
+
       // Tính tổng doanh thu từ tất cả các ngày trong tuần
-      const totalIncome = Object.values(revenueByDay).reduce((total, revenue) => total + revenue.totalRevenue, 0);
-  
+      const totalIncome = Object.values(revenueByDay).reduce(
+        (total, revenue) => total + revenue.totalRevenue,
+        0
+      );
+
       // Tạo đối tượng để lưu trữ thông tin doanh thu hàng tuần
       const weeklyRevenue = [];
-  
+
       // Lặp qua từng ngày trong tuần để tính toán doanh thu hàng tuần
       for (let i = 0; i < 7; i++) {
         const currentDate = new Date(startDate);
         currentDate.setDate(startDate.getDate() + i);
-  
-        const dateString = currentDate.toISOString().split('T')[0];
+
+        const dateString = currentDate.toISOString().split("T")[0];
         const dayOfWeekName = dayNames[currentDate.getDay()];
-  
+
         const dailyRevenue = revenueByDay[dateString] || {
           totalRevenue: 0,
           orderIds: [],
           dayOfWeekName: dayOfWeekName,
         };
-  
+
         weeklyRevenue.push({
           date: dateString,
           dayOfWeek: dayOfWeekName,
@@ -2471,7 +2499,7 @@ module.exports = {
           orderIds: dailyRevenue.orderIds,
         });
       }
-  
+
       // Trả về kết quả trong phản hồi
       return res.send({
         code: 200,
@@ -2495,13 +2523,13 @@ module.exports = {
           select: "name", // Chỉ lấy trường "name" từ bảng "category"
         })
         .populate("supplier");
-  
+
       // Đối chiếu mã danh mục và hiển thị tên danh mục
       results = results.map((product) => {
         const category = product.category ? product.category.name : "";
         return { ...product._doc, category };
       });
-  
+
       return res.send({ code: 200, payload: results });
     } catch (err) {
       console.log("««««« err »»»»»", err);
@@ -2510,13 +2538,13 @@ module.exports = {
   },
   employeeSearch: async (req, res, next) => {
     try {
-      const { firstName,lastName } = req.query;
+      const { firstName, lastName } = req.query;
       const conditionFind = {
         firstName: { $regex: new RegExp(`${firstName}`), $options: "i" },
-        lastName: { $regex: new RegExp(`${lastName}`), $options: "i" }
+        lastName: { $regex: new RegExp(`${lastName}`), $options: "i" },
       };
       let results = await Employee.find(conditionFind);
-       
+
       return res.send({ code: 200, payload: results });
     } catch (err) {
       console.log("««««« err »»»»»", err);
@@ -2535,14 +2563,13 @@ module.exports = {
   //         path: "customer",
   //         select: "firstName lastName", // Chỉ lấy trường "name" từ bảng "category"
   //       })
-      
-  
+
   //     // Đối chiếu mã danh mục và hiển thị tên danh mục
   //     results = results.map((order) => {
   //       const customer = order.customer ? `${order.customer.firstName}  ${order.customer.lastName}` : "";
   //       return { ...order._doc, customer };
   //     });
-  
+
   //     return res.send({ code: 200, payload: results });
   //   } catch (err) {
   //     console.log("««««« err »»»»»", err);
@@ -2551,17 +2578,17 @@ module.exports = {
   // }
   customerSearch: async (req, res, next) => {
     try {
-      const { firstName,lastName } = req.query;
+      const { firstName, lastName } = req.query;
       const conditionFind = {
         firstName: { $regex: new RegExp(`${firstName}`), $options: "i" },
-        lastName: { $regex: new RegExp(`${lastName}`), $options: "i" }
+        lastName: { $regex: new RegExp(`${lastName}`), $options: "i" },
       };
       let results = await Customer.find(conditionFind);
-       
+
       return res.send({ code: 200, payload: results });
     } catch (err) {
       console.log("««««« err »»»»»", err);
       return res.status(500).json({ code: 500, error: err });
     }
-  }
+  },
 };
