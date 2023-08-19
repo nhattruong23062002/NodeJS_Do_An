@@ -30,9 +30,16 @@ const io = socketIo(server, {
 });
 
 // Server side
+const roomMessages = {}; 
+
 io.on('connection', socket => {
   socket.on('joinRoom', ({ roomId }) => {
     socket.join(roomId);
+
+    if (roomMessages[roomId] && roomMessages[roomId].length > 0) {
+      // Gửi tin nhắn tạm thời cho admin khi họ tham gia vào phòng
+      socket.emit('messageHistory', roomMessages[roomId]);
+    }
   });
 
   socket.on('chat', ({ roomId, message }) => {
@@ -40,6 +47,12 @@ io.on('connection', socket => {
       content:message,
       roomId: roomId
     }
+
+    if (!roomMessages[roomId]) {
+      roomMessages[roomId] = [];
+    }
+    roomMessages[roomId].push(messageData);
+
     console.log('««««« message »»»»»', message);
     io.to(roomId).emit('message', messageData);
   });
