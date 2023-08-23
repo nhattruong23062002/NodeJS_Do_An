@@ -1747,9 +1747,41 @@ module.exports = {
 
         results = await Product.find(query);
       } else if (sortBy === "priceLowToHigh") {
-        results = await Product.find(query).sort({ price: 1 });
+        //results = await Product.find(query).sort({ price: 1 });
+        results = await Product.aggregate([
+          { $match: query },
+          {
+            $addFields: {
+              discountedPrice: {
+                $divide: [
+                  {
+                    $multiply: ["$price", { $subtract: [100, "$discount"] }],
+                  },
+                  100,
+                ],
+              },
+            },
+          },
+          { $sort: { discountedPrice: 1 } },
+        ]);
       } else if (sortBy === "priceHighToLow") {
-        results = await Product.find(query).sort({ price: -1 });
+        //results = await Product.find(query).sort({ price: -1 });
+        results = await Product.aggregate([
+          { $match: query },
+          {
+            $addFields: {
+              discountedPrice: {
+                $divide: [
+                  {
+                    $multiply: ["$price", { $subtract: [100, "$discount"] }],
+                  },
+                  100,
+                ],
+              },
+            },
+          },
+          { $sort: { discountedPrice: -1 } },
+        ]);
       } else if (sortBy === "newest") {
         results = await Product.find(query).sort({ createdAt: -1 });
       } else {
