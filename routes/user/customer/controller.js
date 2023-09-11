@@ -122,13 +122,13 @@ module.exports = {
   
       // Gửi email chứa URL đặt lại mật khẩu
       const mailOptions = {
-        from: 'nhattr2306@gmail.com', // Thay thế bằng email của bạn
+        from: 'nhattr2306@gmail.com', // Thay thế bằng email của bạn 
         to: customer.email,
         subject: 'Yêu cầu đặt lại mật khẩu',
         html: `
           <p>Xin chào,</p>
           <p>Bạn đã yêu cầu đặt lại mật khẩu từ mỹ phẩm Elysian.Vui lòng nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:</p>
-          <p><a href="https://next-js-do-an-aptech.vercel.app/resetPassword?token=${token}">Đặt lại mật khẩu</a></p>
+          <p><a href="https://next-js-do-an-aptech-duphong.vercel.app/resetPassword?token=${token}">Đặt lại mật khẩu</a></p>
           <p>Trân trọng,</p>
           <p>Đội ngũ của chúng tôi</p>
         `,
