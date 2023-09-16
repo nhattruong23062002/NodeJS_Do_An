@@ -128,7 +128,7 @@ module.exports = {
         html: `
           <p>Xin chào,</p>
           <p>Bạn đã yêu cầu đặt lại mật khẩu từ mỹ phẩm Elysian.Vui lòng nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:</p>
-          <p><a href="https://next-js-do-an-aptech-duphong.vercel.app/resetPassword?token=${token}">Đặt lại mật khẩu</a></p>
+          <p><a href="localhost:3000/resetPassword?token=${token}">Đặt lại mật khẩu</a></p>
           <p>Trân trọng,</p>
           <p>Đội ngũ của chúng tôi</p>
         `,
