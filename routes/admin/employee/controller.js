@@ -220,7 +220,7 @@ module.exports = {
       const { id } = req.params;
       const updateData = req.body;
 
-      const { email, phoneNumber, address } = updateData;
+      /* const { email, phoneNumber, address } = updateData;
 
       const getEmailExits = Employee.find({ email });
       const getPhoneExits = Employee.find({ phoneNumber });
@@ -240,7 +240,7 @@ module.exports = {
           message: "Không thành công",
           errors,
         });
-      }
+      } */
 
       const found = await Employee.findByIdAndUpdate(id, updateData, {
         new: true,
