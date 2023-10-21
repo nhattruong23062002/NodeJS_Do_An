@@ -31,10 +31,12 @@ const passportConfigLocalUser = new LocalStrategy(
   async (email, password, done) => {
     try {
       const user = await Customer.findOne({ email });
+      console.log('««««« user »»»»»', user);
 
       if (!user) return done(null, false);
 
       const isCorrectPass = await user.isValidPass(password);
+      console.log('««««« isCorrectPass »»»»»', isCorrectPass);
 
       if (!isCorrectPass) return done(null, false);
 
